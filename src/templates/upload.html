@@ -1,0 +1,72 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <input type="file" id="selector" multiple />
+    <button onclick="upload()">Upload</button>
+
+    <div id="status">No uploads</div>
+
+    <script type="text/javascript">
+      // `upload` iterates through all files selected and invokes a helper function called `retrieveNewURL`.
+      function upload() {
+        // Get selected files from the input element.
+        var files = document.querySelector('#selector').files;
+        for (var i = 0; i < files.length; i++) {
+          var file = files[i];
+          // Retrieve a URL from our server.
+          retrieveNewURL(file, (file, url) => {
+            // Upload the file to the server.
+            uploadFile(file, url);
+          });
+        }
+      }
+
+      // `retrieveNewURL` accepts the name of the current file and invokes the `/presignedUrl` endpoint to
+      // generate a pre-signed URL for use in uploading that file:
+      function retrieveNewURL(file, cb) {
+        fetch(`/api/test/upload`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ fileNames: [file.name] }),
+        })
+          .then((response) => {
+            response.text().then((url) => {
+              const parsedUrl = JSON.parse(url);
+              console.log(parsedUrl);
+              cb(file, parsedUrl[0]['uploadURL']);
+            });
+          })
+          .catch((e) => {
+            console.error(e);
+          });
+      }
+
+      // ``uploadFile` accepts the current filename and the pre-signed URL. It then uses `Fetch API`
+      // to upload this file to S3 at `play.min.io:9000` using the URL:
+      function uploadFile(file, url) {
+        console.log(file, url);
+        if (document.querySelector('#status').innerText === 'No uploads') {
+          document.querySelector('#status').innerHTML = '';
+        }
+        fetch(url, {
+          method: 'PUT',
+          body: file,
+        })
+          .then(() => {
+            // If multiple files are uploaded, append upload status on the next line.
+            document.querySelector('#status').innerHTML +=
+              `<br>Uploaded ${file.name}.`;
+          })
+          .catch((e) => {
+            console.error(e);
+          });
+      }
+    </script>
+  </body>
+</html>

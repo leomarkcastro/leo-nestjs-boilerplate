@@ -1,0 +1,11 @@
+export const PERMISSIONS = {
+  AUTH: {
+    LOGIN: 'AUTH_LOGIN',
+    REGISTER: 'AUTH_REGISTER',
+    ME: 'AUTH_ME',
+    RESET_PASSWORD: 'AUTH_RESET_PASSWORD',
+  },
+  TEST: {
+    USE: 'TEST_USE',
+  },
+};
