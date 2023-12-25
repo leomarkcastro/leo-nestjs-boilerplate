@@ -23,7 +23,7 @@ export class AuthService {
     const user = await this.database.user.findUnique({
       where: { email },
       include: {
-        Password: true,
+        LocalAuth: true,
       },
     });
 
@@ -31,10 +31,10 @@ export class AuthService {
     if (!user) return null;
 
     // check if user can login with password
-    if (!user.Password) return null;
+    if (!user.LocalAuth) return null;
 
     // validate password
-    const passHash = user.Password.password;
+    const passHash = user.LocalAuth.password;
     const validate = compareSync(password, passHash);
     if (!validate) return null;
 
@@ -58,7 +58,7 @@ export class AuthService {
     const user = await this.database.user.create({
       data: {
         email,
-        Password: {
+        LocalAuth: {
           create: {
             password: hashedPassword,
           },
@@ -108,10 +108,14 @@ export class AuthService {
     if (!decoded.resetPassword) return;
 
     const hashedPassword = hashSync(newPassword, 10);
-    await this.database.password.update({
-      where: { userId: decoded.id },
+    await this.database.user.update({
+      where: { id: decoded.id },
       data: {
-        password: hashedPassword,
+        LocalAuth: {
+          update: {
+            password: hashedPassword,
+          },
+        },
       },
     });
   }

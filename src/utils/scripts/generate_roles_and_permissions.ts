@@ -52,7 +52,7 @@ async function main() {
   const permissions = await Promise.all(
     PERMISSIONS_TO_CREATE.map(async (permission) => {
       // check if permission exists
-      const permissionExists = await prisma.permissions.findFirst({
+      const permissionExists = await prisma.permission.findFirst({
         where: {
           name: permission,
         },
@@ -60,7 +60,7 @@ async function main() {
       if (permissionExists) {
         return permissionExists;
       }
-      return await prisma.permissions.create({
+      return await prisma.permission.create({
         data: {
           name: permission,
         },

@@ -67,13 +67,13 @@ export class PermitService {
       include: {
         PermissionOnRole: {
           include: {
-            permission: true,
+            Permission: true,
           },
         },
       },
     });
     const permissions = permissionsObjects.PermissionOnRole.map(
-      (p) => p.permission.name,
+      (p) => p.Permission.name,
     );
     // Cache End === Role.<id>.PermissionOnRole
 
