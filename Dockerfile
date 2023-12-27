@@ -37,6 +37,9 @@ COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modul
 
 COPY --chown=node:node . .
 
+# Run Prisma generate to generate the Prisma client
+RUN yarn prisma generate
+
 # Run the build command which creates the production bundle
 RUN yarn build
 

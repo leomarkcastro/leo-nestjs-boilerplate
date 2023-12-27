@@ -8,11 +8,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   //     log: ['error', 'info', 'query', 'warn'],
   //   });
 
-  //   // @ts-expect-error - this is a private property
   //   super.$on('query', (e) => {
-  //     // @ts-expect-error - this is a private property
   //     console.verbose('Query: ' + e.query);
-  //     // @ts-expect-error - this is a private property
   //     console.debug('Duration: ' + e.duration + 'ms');
   //   });
 
