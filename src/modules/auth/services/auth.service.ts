@@ -1,12 +1,15 @@
 import { CONFIG } from '@/config/env';
 import { AccessToken_Response } from '@/global/types/JWTAccessToken.dto';
+import { Roles } from '@/global/types/Roles.dto';
 import { MailBrevoService } from '@/modules/mail-brevo/mail-brevo.service';
 import { PrismaService } from '@@/db-prisma/db-prisma.service';
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compareSync, hashSync } from 'bcrypt';
+import { IChangePassword } from '../types/ChangePassword.dto';
 import { IResetPasswordJWT } from '../types/ResetPasswordJWT.dto';
 import { IUserJwt } from '../types/UserJWT.dto';
+import { IUserMe, UpdatableUser } from '../types/UserMe.dto';
 
 @Injectable()
 export class AuthService {
@@ -63,6 +66,11 @@ export class AuthService {
             password: hashedPassword,
           },
         },
+        Role: {
+          connect: {
+            name: Roles.USER,
+          },
+        },
       },
     });
 
@@ -116,6 +124,72 @@ export class AuthService {
             password: hashedPassword,
           },
         },
+      },
+    });
+  }
+
+  async getMe(user: IUserJwt): Promise<IUserMe> {
+    const userObj = await this.database.user.findUnique({
+      where: { id: user.id },
+      include: {
+        Role: true,
+        Department: true,
+        Position: true,
+      },
+    });
+    if (!userObj) throw new HttpException('User not found', 404);
+
+    userObj.firstName = userObj.firstName || userObj.email.split('@')[0];
+
+    return {
+      id: userObj.id,
+      email: userObj.email,
+      firstName: userObj.firstName,
+      lastName: userObj.lastName,
+      fullName: `${userObj.firstName} ${userObj.lastName}`,
+      userName: userObj.firstName,
+      avatar: userObj.avatar,
+      role: userObj.Role?.name,
+      address: userObj.address,
+      description: userObj.description,
+      phone: userObj.phone,
+      department: userObj.Department?.name,
+      position: userObj.Position?.name,
+    };
+  }
+
+  async updateMe(
+    user: IUserJwt,
+    data: Partial<UpdatableUser>,
+  ): Promise<IUserMe> {
+    await this.database.user.update({
+      where: { id: user.id },
+      data,
+    });
+
+    return await this.getMe(user);
+  }
+
+  async changePassword(user: IUserJwt, passwordInput: IChangePassword) {
+    const userObj = await this.database.user.findUnique({
+      where: { id: user.id },
+      include: {
+        LocalAuth: true,
+      },
+    });
+    if (!userObj) throw new HttpException('User not found', 404);
+
+    const validate = compareSync(
+      passwordInput.oldPassword,
+      userObj.LocalAuth.password,
+    );
+    if (!validate) throw new HttpException('Wrong password', 400);
+
+    const hashedPassword = hashSync(passwordInput.newPassword, 10);
+    await this.database.localAuth.update({
+      where: { id: userObj.LocalAuth.id },
+      data: {
+        password: hashedPassword,
       },
     });
   }

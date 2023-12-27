@@ -1,21 +1,39 @@
 // import prisma client
 import { PrismaClient } from '@prisma/client';
+import { Roles } from '../../global/types/Roles.dto';
 import { PERMISSIONS } from '../../modules/permit/permissions.types';
 
 // instantiate prisma client
 const prisma = new PrismaClient();
 
-async function main() {
-  const ROLES_TO_CREATE = ['GUEST', 'ADMIN', 'USER', 'DEV'];
-  const PERMISSIONS_TO_CREATE = [];
-  for (const role in PERMISSIONS) {
-    for (const permission in PERMISSIONS[role]) {
-      PERMISSIONS_TO_CREATE.push(PERMISSIONS[role][permission]);
+function recursivelyGetValues(obj: any) {
+  const values: string[] = [];
+  for (const key in obj) {
+    if (typeof obj[key] === 'object') {
+      values.push(...recursivelyGetValues(obj[key]));
+    } else {
+      values.push(obj[key]);
     }
   }
+  return values;
+}
+
+async function main() {
+  const ROLES_TO_CREATE = Object.values(Roles);
+  const PERMISSIONS_TO_CREATE = recursivelyGetValues(PERMISSIONS);
+
   const PERMISSIONS_TO_ROLE = {
-    ADMIN: [],
-    USER: [],
+    USER: [
+      PERMISSIONS.AUTH.CHANGE_PASSWORD,
+      PERMISSIONS.AUTH.ME,
+      PERMISSIONS.AUTH.UPDATEME,
+      ...recursivelyGetValues(PERMISSIONS.FILE),
+      ...recursivelyGetValues(PERMISSIONS.EVENTS.EVENT),
+      PERMISSIONS.EVENTS.CALENDAR.GET,
+      PERMISSIONS.EVENTS.EVENT.GET,
+      ...recursivelyGetValues(PERMISSIONS.TASK),
+      PERMISSIONS.NOTIF.READ,
+    ],
     GUEST: [
       PERMISSIONS.AUTH.LOGIN,
       PERMISSIONS.AUTH.REGISTER,
@@ -23,8 +41,19 @@ async function main() {
     ],
   };
 
+  PERMISSIONS_TO_ROLE['ADMIN'] = [
+    ...PERMISSIONS_TO_ROLE.USER,
+    ...recursivelyGetValues(PERMISSIONS.CONTACTS),
+    ...recursivelyGetValues(PERMISSIONS.DEPARTMENTS),
+    ...recursivelyGetValues(PERMISSIONS.EVENTS),
+    ...recursivelyGetValues(PERMISSIONS.FILE),
+    ...recursivelyGetValues(PERMISSIONS.NOTIF),
+    ...recursivelyGetValues(PERMISSIONS.POSITIONS),
+    ...recursivelyGetValues(PERMISSIONS.TASK),
+  ];
+
   PERMISSIONS_TO_ROLE['DEV'] = [
-    ...PERMISSIONS_TO_ROLE.ADMIN,
+    ...PERMISSIONS_TO_ROLE['ADMIN'],
     PERMISSIONS.TEST.USE,
   ];
 
@@ -38,8 +67,10 @@ async function main() {
         },
       });
       if (roleExists) {
+        console.log(`Role ${role} already exists`);
         return roleExists;
       }
+      console.log(`Creating role ${role}`);
       return await prisma.role.create({
         data: {
           name: role,
@@ -58,8 +89,10 @@ async function main() {
         },
       });
       if (permissionExists) {
+        console.log(`Permission ${permission} already exists`);
         return permissionExists;
       }
+      console.log(`Creating permission ${permission}`);
       return await prisma.permission.create({
         data: {
           name: permission,
@@ -82,8 +115,14 @@ async function main() {
             },
           });
           if (permissionAssigned) {
+            console.log(
+              `Permission ${permission} already assigned to role ${role.name}`,
+            );
             return permissionAssigned;
           }
+          console.log(
+            `Assigning permission ${permission} to role ${role.name}`,
+          );
           await prisma.permissionOnRole.create({
             data: {
               roleId: role.id,
@@ -92,6 +131,33 @@ async function main() {
           });
         }),
       );
+    }),
+  );
+
+  // delete all PermissionOnRole that is not in PERMISSIONS_TO_ROLE
+  const permissionOnRoles = await prisma.permissionOnRole.findMany();
+  await Promise.all(
+    permissionOnRoles.map(async (permissionOnRole) => {
+      const permission = await prisma.permission.findUnique({
+        where: {
+          id: permissionOnRole.permissionId,
+        },
+      });
+      const role = await prisma.role.findUnique({
+        where: {
+          id: permissionOnRole.roleId,
+        },
+      });
+      if (!PERMISSIONS_TO_ROLE[role.name].includes(permission.name)) {
+        console.log(
+          `Deleting permission ${permission.name} from role ${role.name}`,
+        );
+        await prisma.permissionOnRole.delete({
+          where: {
+            id: permissionOnRole.id,
+          },
+        });
+      }
     }),
   );
 }

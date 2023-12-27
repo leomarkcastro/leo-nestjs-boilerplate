@@ -7,7 +7,7 @@ export type PermitRule<V> =
     }
   | {
       type: 'Condition';
-      condition: (user: IUserJwt, resource: V) => boolean;
+      condition: (source: { user: IUserJwt; resource: V }) => boolean;
     }
   | {
       type: 'AND';

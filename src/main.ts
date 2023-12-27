@@ -1,6 +1,7 @@
-import { INestApplication, Logger } from '@nestjs/common';
+import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { writeFileSync } from 'fs';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import cors from './config/cors';
@@ -19,6 +20,8 @@ async function setupSwagger(app: INestApplication) {
     .addBearerAuth();
 
   const document = SwaggerModule.createDocument(app, documentBuilder.build());
+
+  writeFileSync('./swagger.json', JSON.stringify(document));
   SwaggerModule.setup('/documentation', app, document, {
     swaggerOptions: {
       persistAuthorization: true,
@@ -47,6 +50,15 @@ async function bootstrap() {
 
   const adapterHost = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(adapterHost));
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      stopAtFirstError: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+      // whitelist: true,
+    }),
+  );
 
   if (ON_DEV_ENV) {
     app.use(logger);

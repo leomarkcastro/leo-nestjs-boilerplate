@@ -5,6 +5,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator prismaClassGenerator {
+  provider = "prisma-class-generator"
+  dryRun   = false
+  output   = "../generated/prisma-classes"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -27,20 +33,19 @@ model User {
   LocalAuth          LocalAuth?
   NotificationOnUser NotificationOnUser[]
   FileOnUser         FileOnUser[]
-  TaskOnUser         TaskOnUser[]
   CalendarOnUser     CalendarOnUser[]
   Department         Department?          @relation(fields: [departmentId], references: [id])
   departmentId       String?
   Position           Position?            @relation(fields: [positionId], references: [id])
   positionId         String?
-  CaseOnUser         CaseOnUser[]
+  UserOnBoard        UserOnBoard[]
 }
 
 model LocalAuth {
   id                     String    @id @default(cuid())
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
-  User                   User      @relation(fields: [userId], references: [id])
+  User                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId                 String    @unique
   twofa                  String?
   lastTwoFaRequest       DateTime?
@@ -70,10 +75,12 @@ model PermissionOnRole {
   id           String     @id @default(cuid())
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
-  Role         Role       @relation(fields: [roleId], references: [id])
+  Role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
   roleId       String
-  Permission   Permission @relation(fields: [permissionId], references: [id])
+  Permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
   permissionId String
+
+  @@unique([roleId, permissionId])
 }
 
 model File {
@@ -93,10 +100,13 @@ model FileOnUser {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   type      String?
-  File      File     @relation(fields: [fileId], references: [id])
+  File      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
   fileId    String
-  User      User     @relation(fields: [userId], references: [id])
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
+
+  @@unique([fileId, userId])
+  @@unique([fileId, userId, type])
 }
 
 model Notification {
@@ -113,24 +123,61 @@ model NotificationOnUser {
   id             String       @id @default(cuid())
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  Notification   Notification @relation(fields: [notificationId], references: [id])
+  type           String?
+  hasRead        Boolean      @default(false)
+  Notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
   notificationId String
-  User           User         @relation(fields: [userId], references: [id])
+  User           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
+
+  @@unique([notificationId, userId])
+  @@unique([notificationId, userId, type])
 }
 
-model Task {
+model Board {
   id          String        @id @default(cuid())
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  title       String
-  priority    String
-  dueDate     DateTime
-  content     String?
-  status      String
-  TaskOnUser  TaskOnUser[]
-  FileOnTask  FileOnTask[]
-  TaskOnEvent TaskOnEvent[]
+  name        String
+  Lists       List[]
+  UserOnBoard UserOnBoard[]
+}
+
+model UserOnBoard {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  type      String?
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  Board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  boardId   String
+
+  @@unique([userId, boardId])
+  @@unique([userId, boardId, type])
+}
+
+model List {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  Board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  boardId   String
+  Tasks     Task[]
+}
+
+model Task {
+  id         String       @id @default(cuid())
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  title      String
+  priority   String
+  dueDate    DateTime
+  content    String?
+  FileOnTask FileOnTask[]
+  List       List         @relation(fields: [listId], references: [id], onDelete: Cascade)
+  listId     String
 }
 
 model FileOnTask {
@@ -138,21 +185,13 @@ model FileOnTask {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   type      String?
-  File      File     @relation(fields: [fileId], references: [id])
+  File      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
   fileId    String
-  Task      Task     @relation(fields: [taskId], references: [id])
+  Task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   taskId    String
-}
 
-model TaskOnUser {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  type      String?
-  Task      Task     @relation(fields: [taskId], references: [id])
-  taskId    String
-  User      User     @relation(fields: [userId], references: [id])
-  userId    String
+  @@unique([fileId, taskId])
+  @@unique([fileId, taskId, type])
 }
 
 model Calendar {
@@ -160,7 +199,7 @@ model Calendar {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   title           String
-  descrition      String?
+  description     String?
   backgroundColor String
   textColor       String
   CalendarOnUser  CalendarOnUser[]
@@ -172,70 +211,28 @@ model CalendarOnUser {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   type       String?
-  Calendar   Calendar @relation(fields: [calendarId], references: [id])
+  Calendar   Calendar @relation(fields: [calendarId], references: [id], onDelete: Cascade)
   calendarId String
-  User       User     @relation(fields: [userId], references: [id])
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
+
+  @@unique([calendarId, userId])
+  @@unique([calendarId, userId, type])
 }
 
 model Event {
-  id              String        @id @default(cuid())
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
   title           String
-  descrition      String?
+  description     String?
   backgroundColor String?
   textColor       String?
   start           DateTime?
   end             DateTime?
   allDay          Boolean
-  Calendar        Calendar      @relation(fields: [calendarId], references: [id])
+  Calendar        Calendar  @relation(fields: [calendarId], references: [id], onDelete: Cascade)
   calendarId      String
-  TaskOnEvent     TaskOnEvent[]
-  CaseOnEvent     CaseOnEvent[]
-}
-
-model TaskOnEvent {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  type      String?
-  Task      Task     @relation(fields: [taskId], references: [id])
-  taskId    String
-  Event     Event    @relation(fields: [eventId], references: [id])
-  eventId   String
-}
-
-model Case {
-  id          String        @id @default(cuid())
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  title       String
-  content     String?
-  CaseOnUser  CaseOnUser[]
-  CaseOnEvent CaseOnEvent[]
-}
-
-model CaseOnUser {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  type      String?
-  Case      Case     @relation(fields: [caseId], references: [id])
-  caseId    String
-  User      User     @relation(fields: [userId], references: [id])
-  userId    String
-}
-
-model CaseOnEvent {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  type      String?
-  Case      Case     @relation(fields: [caseId], references: [id])
-  caseId    String
-  Event     Event    @relation(fields: [eventId], references: [id])
-  eventId   String
 }
 
 model Department {
@@ -259,12 +256,12 @@ model Contact {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   firstName String
-  lastName  String
+  lastName  String?
   email     String
-  phone     String
-  address   String
-  company   String
-  jobTitle  String
+  phone     String?
+  address   String?
+  company   String?
+  jobTitle  String?
   note      String?
   avatar    String?
 }

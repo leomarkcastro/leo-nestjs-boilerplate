@@ -7,7 +7,7 @@ import { PermitRule } from './permit-rule.types';
 // create a new exception for PERMISSION_DENIED
 export class PermissionDeniedException extends HttpException {
   constructor() {
-    super('Permission denied', 401);
+    super('Permission denied', 403);
   }
 }
 
@@ -21,12 +21,21 @@ export class PermitService {
     user: IUserJwt | null,
     resource: V,
     rule: PermitRule<V>,
+    options?: {
+      throwOnResourceNotFound?: boolean;
+    },
   ): Promise<boolean> {
+    if (
+      options?.throwOnResourceNotFound &&
+      (!resource || (resource && !Object.keys(resource).length))
+    )
+      throw new HttpException('Resource not found', 404);
+
     switch (rule.type) {
       case 'Permission':
-        return this.checkPermission(user, rule.role);
+        return this.role(user, rule.role);
       case 'Condition':
-        return rule.condition(user, resource);
+        return rule.condition({ user, resource });
       case 'AND':
         return this.checkAND(user, resource, rule.rules);
       case 'OR':
@@ -34,7 +43,7 @@ export class PermitService {
     }
   }
 
-  async checkPermission(user: IUserJwt | null, permission: string) {
+  async role(user: IUserJwt | null, permission: string) {
     let role: Role;
     if (user) {
       const userObj = await this.db.user.findUnique({
