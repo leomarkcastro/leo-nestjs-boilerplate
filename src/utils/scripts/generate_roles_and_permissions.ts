@@ -57,109 +57,102 @@ async function main() {
     PERMISSIONS.TEST.USE,
   ];
 
+  const roles = [];
   // create roles
-  const roles = await Promise.all(
-    ROLES_TO_CREATE.map(async (role) => {
-      // check if role exists
-      const roleExists = await prisma.role.findFirst({
-        where: {
-          name: role,
-        },
-      });
-      if (roleExists) {
-        console.log(`Role ${role} already exists`);
-        return roleExists;
-      }
-      console.log(`Creating role ${role}`);
-      return await prisma.role.create({
-        data: {
-          name: role,
-        },
-      });
-    }),
-  );
+  for (const role of ROLES_TO_CREATE) {
+    // check if role exists
+    const roleExists = await prisma.role.findFirst({
+      where: {
+        name: role,
+      },
+    });
+    if (roleExists) {
+      console.log(`Role ${role} already exists`);
+      roles.push(roleExists);
+      continue;
+    }
+    console.log(`Creating role ${role}`);
+    const _role = await prisma.role.create({
+      data: {
+        name: role,
+      },
+    });
+    roles.push(_role);
+  }
 
+  const permissions = [];
   // create permissions
-  const permissions = await Promise.all(
-    PERMISSIONS_TO_CREATE.map(async (permission) => {
-      // check if permission exists
-      const permissionExists = await prisma.permission.findFirst({
-        where: {
-          name: permission,
-        },
-      });
-      if (permissionExists) {
-        console.log(`Permission ${permission} already exists`);
-        return permissionExists;
-      }
-      console.log(`Creating permission ${permission}`);
-      return await prisma.permission.create({
-        data: {
-          name: permission,
-        },
-      });
-    }),
-  );
+  for (const permission of PERMISSIONS_TO_CREATE) {
+    // check if permission exists
+    const permissionExists = await prisma.permission.findFirst({
+      where: {
+        name: permission,
+      },
+    });
+    if (permissionExists) {
+      console.log(`Permission ${permission} already exists`);
+      permissions.push(permissionExists);
+      continue;
+    }
+    console.log(`Creating permission ${permission}`);
+    const _permission = await prisma.permission.create({
+      data: {
+        name: permission,
+      },
+    });
+    permissions.push(_permission);
+  }
 
-  // assign permissions to roles
-  await Promise.all(
-    roles.map(async (role) => {
-      const permissionsToAssign = PERMISSIONS_TO_ROLE[role.name];
-      await Promise.all(
-        permissionsToAssign.map(async (permission) => {
-          // check if permission is already assigned to role
-          const permissionAssigned = await prisma.permissionOnRole.findFirst({
-            where: {
-              roleId: role.id,
-              permissionId: permissions.find((p) => p.name === permission).id,
-            },
-          });
-          if (permissionAssigned) {
-            console.log(
-              `Permission ${permission} already assigned to role ${role.name}`,
-            );
-            return permissionAssigned;
-          }
-          console.log(
-            `Assigning permission ${permission} to role ${role.name}`,
-          );
-          await prisma.permissionOnRole.create({
-            data: {
-              roleId: role.id,
-              permissionId: permissions.find((p) => p.name === permission).id,
-            },
-          });
-        }),
-      );
-    }),
-  );
+  for (const role of roles) {
+    const permissionsToAssign = PERMISSIONS_TO_ROLE[role.name];
+    for (const permission of permissionsToAssign) {
+      // check if permission is already assigned to role
+      const permissionAssigned = await prisma.permissionOnRole.findFirst({
+        where: {
+          roleId: role.id,
+          permissionId: permissions.find((p) => p.name === permission).id,
+        },
+      });
+      if (permissionAssigned) {
+        console.log(
+          `Permission ${permission} already assigned to role ${role.name}`,
+        );
+        continue;
+      }
+      console.log(`Assigning permission ${permission} to role ${role.name}`);
+      await prisma.permissionOnRole.create({
+        data: {
+          roleId: role.id,
+          permissionId: permissions.find((p) => p.name === permission).id,
+        },
+      });
+    }
+  }
 
   // delete all PermissionOnRole that is not in PERMISSIONS_TO_ROLE
   const permissionOnRoles = await prisma.permissionOnRole.findMany();
-  await Promise.all(
-    permissionOnRoles.map(async (permissionOnRole) => {
-      const permission = await prisma.permission.findUnique({
+  for (const permissionOnRole of permissionOnRoles) {
+    const permission = await prisma.permission.findUnique({
+      where: {
+        id: permissionOnRole.permissionId,
+      },
+    });
+    const role = await prisma.role.findUnique({
+      where: {
+        id: permissionOnRole.roleId,
+      },
+    });
+    if (!PERMISSIONS_TO_ROLE[role.name].includes(permission.name)) {
+      console.log(
+        `Deleting permission ${permission.name} from role ${role.name}`,
+      );
+      await prisma.permissionOnRole.delete({
         where: {
-          id: permissionOnRole.permissionId,
+          id: permissionOnRole.id,
         },
       });
-      const role = await prisma.role.findUnique({
-        where: {
-          id: permissionOnRole.roleId,
-        },
-      });
-      if (!PERMISSIONS_TO_ROLE[role.name].includes(permission.name)) {
-        console.log(
-          `Deleting permission ${permission.name} from role ${role.name}`,
-        );
-        await prisma.permissionOnRole.delete({
-          where: {
-            id: permissionOnRole.id,
-          },
-        });
-      }
-    }),
-  );
+    }
+  }
 }
 
 main();
