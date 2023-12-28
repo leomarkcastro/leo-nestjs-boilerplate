@@ -155,6 +155,7 @@ export class AuthService {
       phone: userObj.phone,
       department: userObj.Department?.name,
       position: userObj.Position?.name,
+      name: userObj.firstName,
     };
   }
 

@@ -32,4 +32,11 @@ export class IUserMe extends UpdatableUser {
   role: string;
   position: string;
   department: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  avatar: string;
+  address: string;
+  description: string;
+  phone: string;
 }
