@@ -1,3 +1,4 @@
+import { AuthResponse } from '../api';
 import { api } from './_client_gen';
 import { PREAUTH } from './preAuths';
 
@@ -13,17 +14,21 @@ async function main() {
   console.log('login', login);
 
   // Me
-  client.request.config.TOKEN = login.accessToken;
+
+  if (login.type === AuthResponse.type.JWT) {
+    client.request.config.TOKEN = login.jwt.accessToken;
+  }
 
   // get all departments
 
   console.log('Fetching departments');
 
-  const departments = await client.department.appDepartmentControllerFindAll(
-    undefined,
-    undefined,
-    1,
-  );
+  const departments =
+    await client.department.appDepartmentControllerFindAllDetailed(
+      undefined,
+      undefined,
+      1,
+    );
 
   console.log('departments', departments);
 
@@ -48,7 +53,7 @@ async function main() {
   // get all departments
 
   const redepartments =
-    await client.department.appDepartmentControllerFindAll();
+    await client.department.appDepartmentControllerFindAllDetailed();
 
   console.log('departments', redepartments);
 
@@ -65,7 +70,7 @@ async function main() {
   // get all departments
 
   const re3departments =
-    await client.department.appDepartmentControllerFindAll();
+    await client.department.appDepartmentControllerFindAllDetailed();
 
   console.log('departments', re3departments);
 
@@ -82,15 +87,23 @@ async function main() {
 
   // get all departments
 
-  const re4departments = await client.department.appDepartmentControllerFindAll(
-    undefined,
-    undefined,
-    1,
-    undefined,
-    false,
-  );
+  const re4departments =
+    await client.department.appDepartmentControllerFindAllDetailed(
+      undefined,
+      undefined,
+      1,
+      undefined,
+      false,
+    );
 
   console.log('departments', re4departments);
+
+  // get department list
+
+  const departmentList =
+    await client.department.appDepartmentControllerFindAll();
+
+  console.log('departmentList', departmentList);
 
   // delete department
 
@@ -101,13 +114,14 @@ async function main() {
 
   // get all departments
 
-  const re2departments = await client.department.appDepartmentControllerFindAll(
-    undefined,
-    undefined,
-    1,
-    undefined,
-    false,
-  );
+  const re2departments =
+    await client.department.appDepartmentControllerFindAllDetailed(
+      undefined,
+      undefined,
+      1,
+      undefined,
+      false,
+    );
 
   console.log('departments', re2departments);
 }

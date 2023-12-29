@@ -65,11 +65,19 @@ export class AppDepartmentController {
     return this.appDepartmentService.remove(id);
   }
 
-  @Get()
+  @Get('detailed')
   @WithPermission([PERMISSIONS.DEPARTMENTS.GET])
   @Auth()
   @ApiPaginatedResponse(DepartmentWithUsers)
-  findAll(@Query() pagination: IPagination) {
+  findAllDetailed(@Query() pagination: IPagination) {
     return this.appDepartmentService.listAllMembers(pagination);
+  }
+
+  @Get()
+  @WithPermission([PERMISSIONS.DEPARTMENTS.GET])
+  @Auth()
+  @ApiPaginatedResponse(Department)
+  findAll(@Query() pagination: IPagination) {
+    return this.appDepartmentService.getDepartments(pagination);
   }
 }

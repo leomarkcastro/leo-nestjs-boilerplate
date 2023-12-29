@@ -43,6 +43,41 @@ export class AppPositionService {
     });
   }
 
+  async getPositions(
+    pagination: IPagination,
+  ): Promise<IPaginationResponse<Position>> {
+    const query: Prisma.PositionFindManyArgs = {
+      take: pagination.limit,
+      skip: (pagination.page - 1) * pagination.limit,
+      orderBy: {
+        [pagination.sortBy]: pagination.sortDesc ? 'desc' : 'asc',
+      },
+    };
+    if (pagination.search && pagination.search.length > 0) {
+      query.where = {
+        OR: [
+          {
+            name: {
+              contains: pagination.search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      };
+    }
+    const data = await this.db.position.findMany({
+      ...query,
+    });
+    const total = await this.db.position.count();
+
+    return {
+      data,
+      total,
+      limit: pagination.limit,
+      page: pagination.page,
+    };
+  }
+
   async listAllMembers(
     pagination: IPagination,
   ): Promise<IPaginationResponse<PositionWithUsers>> {

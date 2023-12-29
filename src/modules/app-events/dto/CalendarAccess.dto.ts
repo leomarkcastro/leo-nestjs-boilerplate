@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
 export const CalendarAccess = {
@@ -15,6 +16,7 @@ export class ManageMembersListRequest {
 
 export class ManageMembersRequest {
   @IsString()
+  @ApiProperty({ enum: Object.values(CalendarAccess) })
   type?: BoardAccessType = CalendarAccess.VIEW;
 
   @IsString()

@@ -1,3 +1,4 @@
+import { Department } from '@/global/prisma-classes/department';
 import {
   IPagination,
   IPaginationResponse,
@@ -33,6 +34,39 @@ export class AppDepartmentService {
     return await this.db.department.delete({
       where: { id },
     });
+  }
+
+  async getDepartments(
+    pagination: IPagination,
+  ): Promise<IPaginationResponse<Department>> {
+    const query: Prisma.DepartmentFindManyArgs = {
+      take: pagination.limit,
+      skip: (pagination.page - 1) * pagination.limit,
+      orderBy: {
+        [pagination.sortBy]: pagination.sortDesc ? 'desc' : 'asc',
+      },
+    };
+    if (pagination.search && pagination.search.length > 0) {
+      query.where = {
+        OR: [
+          {
+            name: {
+              contains: pagination.search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      };
+    }
+    const data = await this.db.department.findMany(query);
+    const total = await this.db.department.count();
+
+    return {
+      data,
+      total,
+      limit: pagination.limit,
+      page: pagination.page,
+    };
   }
 
   async listAllMembers(

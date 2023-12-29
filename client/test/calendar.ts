@@ -1,3 +1,4 @@
+import { AuthResponse, ManageMembersRequest } from '../api';
 import { api } from './_client_gen';
 import { PREAUTH } from './preAuths';
 
@@ -13,7 +14,10 @@ async function checkAsCoMember() {
   console.log('login', login);
 
   // Me
-  client.request.config.TOKEN = login.accessToken;
+
+  if (login.type === AuthResponse.type.JWT) {
+    client.request.config.TOKEN = login.jwt.accessToken;
+  }
 
   // get all calendars
   const calendars = await client.events.appEventsControllerGetCalendars();
@@ -51,7 +55,9 @@ async function main() {
   console.log('login', login);
 
   // Me
-  client.request.config.TOKEN = login.accessToken;
+  if (login.type === AuthResponse.type.JWT) {
+    client.request.config.TOKEN = login.jwt.accessToken;
+  }
 
   // create calendar
   const createCalendar = await client.events.appEventsControllerCreateCalendar({
@@ -144,7 +150,7 @@ async function main() {
         members: [
           {
             userId: PREAUTH.USER.id,
-            type: 'EDIT',
+            type: ManageMembersRequest.type.EDIT,
           },
         ],
       },

@@ -4,6 +4,7 @@ import { WithPermission } from '@/global/decorators/Permissions.decorator';
 import { IPagination } from '@/global/types/Pagination.dto';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Position } from 'generated/prisma-classes/position';
 import { PERMISSIONS } from '../permit/permissions.types';
 import { AppPositionService } from './app-position.service';
 import { PositionWithUsers } from './dto/PositionWithUsers.dto';
@@ -59,11 +60,19 @@ export class AppPositionController {
     return this.service.remove(id);
   }
 
-  @Get()
+  @Get('detailed')
   @WithPermission([PERMISSIONS.POSITIONS.GET])
   @Auth()
   @ApiPaginatedResponse(PositionWithUsers)
-  findAll(@Query() pagination: IPagination) {
+  findAllDetailed(@Query() pagination: IPagination) {
     return this.service.listAllMembers(pagination);
+  }
+
+  @Get('')
+  @WithPermission([PERMISSIONS.POSITIONS.GET])
+  @Auth()
+  @ApiPaginatedResponse(Position)
+  findAll(@Query() pagination: IPagination) {
+    return this.service.getPositions(pagination);
   }
 }
