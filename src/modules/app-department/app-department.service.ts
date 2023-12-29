@@ -66,7 +66,12 @@ export class AppDepartmentService {
     const data = await this.db.department.findMany({
       ...query,
       include: {
-        User: true,
+        User: {
+          include: {
+            Position: true,
+            Role: true,
+          },
+        },
       },
     });
     const total = await this.db.department.count();

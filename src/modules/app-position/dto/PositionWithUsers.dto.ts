@@ -1,6 +1,6 @@
 import { Position } from '@/global/prisma-classes/position';
-import { User } from '@/global/prisma-classes/user';
+import { UserWithRelation } from '@/global/prisma-classes/user_with_relation';
 
 export class PositionWithUsers extends Position {
-  User: User[];
+  User: UserWithRelation[];
 }

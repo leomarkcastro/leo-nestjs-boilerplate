@@ -184,11 +184,14 @@ export class AuthService {
       userName: userObj.firstName,
       avatar: userObj.avatar,
       role: userObj.Role?.name,
+      roleId: userObj.Role?.id,
       address: userObj.address,
       description: userObj.description,
       phone: userObj.phone,
       department: userObj.Department?.name,
+      departmentId: userObj.Department?.id,
       position: userObj.Position?.name,
+      positionId: userObj.Position?.id,
       name: userObj.firstName,
     };
   }

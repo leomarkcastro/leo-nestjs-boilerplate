@@ -77,7 +77,12 @@ export class AppPositionService {
     const data = await this.db.position.findMany({
       ...query,
       include: {
-        User: true,
+        User: {
+          include: {
+            Department: true,
+            Role: true,
+          },
+        },
       },
     });
     const total = await this.db.position.count();

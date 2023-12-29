@@ -1,6 +1,6 @@
 import { Department } from '@/global/prisma-classes/department';
-import { User } from '@/global/prisma-classes/user';
+import { UserWithRelation } from '@/global/prisma-classes/user_with_relation';
 
 export class DepartmentWithUsers extends Department {
-  User: User[];
+  User: UserWithRelation[];
 }
