@@ -1,12 +1,14 @@
 import { Auth } from '@/global/decorators/Auth.decorator';
+import { CurrentUser } from '@/global/decorators/CurrentUser.decorator';
 import { WithPermission } from '@/global/decorators/Permissions.decorator';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { IUserJwt } from '../auth/types/UserJWT.dto';
 import { PrismaService } from '../db-prisma/db-prisma.service';
 import { PERMISSIONS } from '../permit/permissions.types';
 import { PermitService } from '../permit/permit.service';
 import { AppRolesService } from './app-roles.service';
-import { CreateRole } from './dto/RoleObjects.dto';
+import { CreateRole, PermissionToCheck } from './dto/RoleObjects.dto';
 
 @Controller('app-roles')
 @ApiTags('roles')
@@ -89,5 +91,24 @@ export class AppRolesController {
     @Body() permissionIds: string[],
   ) {
     return await this.service.removePermissionsFromRole(roleId, permissionIds);
+  }
+
+  // ===================================== ROLES ON USER
+
+  // get roles on user
+  @Get('my-role')
+  @Auth()
+  async getMyRoles(@CurrentUser() user: IUserJwt) {
+    return await this.service.checkRole(user);
+  }
+
+  // get my permissions
+  @Post('check-permissions')
+  @Auth()
+  async getMyPermissions(
+    @CurrentUser() user: IUserJwt,
+    @Body() body: PermissionToCheck,
+  ) {
+    return await this.service.hasPermissions(user, body.permissions);
   }
 }

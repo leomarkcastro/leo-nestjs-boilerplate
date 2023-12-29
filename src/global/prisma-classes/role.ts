@@ -12,4 +12,7 @@ export class Role {
 
   @ApiProperty({ type: Date })
   updatedAt: Date;
+
+  @ApiProperty({ type: Boolean, required: false })
+  isCustom?: boolean;
 }

@@ -1,8 +1,10 @@
 import { Role } from '@/global/prisma-classes/role';
 import { Injectable } from '@nestjs/common';
+import { IUserJwt } from '../auth/types/UserJWT.dto';
 import { PrismaService } from '../db-prisma/db-prisma.service';
 import {
   CreateRole,
+  PermissionMapResponse,
   RoleWithPermissions,
   UpdateRole,
 } from './dto/RoleObjects.dto';
@@ -31,6 +33,7 @@ export class AppRolesService {
     return await this.database.role.create({
       data: {
         name: data.name,
+        isCustom: true,
       },
     });
   }
@@ -50,6 +53,7 @@ export class AppRolesService {
     return await this.database.role.delete({
       where: {
         id,
+        isCustom: true,
       },
     });
   }
@@ -110,5 +114,49 @@ export class AppRolesService {
         },
       },
     });
+  }
+
+  async checkRole(user: IUserJwt): Promise<Role> {
+    const userObj = await this.database.user.findUnique({
+      where: { id: user.id },
+      include: {
+        Role: true,
+      },
+    });
+    if (!userObj) throw new Error('User not found');
+    return userObj.Role;
+  }
+
+  async hasPermissions(
+    user: IUserJwt,
+    permissions: string[],
+  ): Promise<PermissionMapResponse> {
+    const userObj = await this.database.user.findUnique({
+      where: { id: user.id },
+      include: {
+        Role: {
+          include: {
+            PermissionOnRole: {
+              include: {
+                Permission: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!userObj) throw new Error('User not found');
+    const userPermissions = userObj.Role.PermissionOnRole.map(
+      (permissionOnRole) => permissionOnRole.Permission.name,
+    );
+    const result = new Map<string, boolean>();
+    permissions.forEach((permission) => {
+      result.set(permission, userPermissions.includes(permission));
+    });
+    const resultObject = {};
+    result.forEach((value, key) => {
+      resultObject[key] = value;
+    });
+    return { permissions: resultObject };
   }
 }

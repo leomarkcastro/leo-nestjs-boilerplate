@@ -22,6 +22,14 @@ async function main() {
 
   console.log('roles', roles);
 
+  // check if has role
+
+  const hasRole = await client.roles.appRolesControllerGetMyPermissions({
+    permissions: ['FLAGS_ADMINUI', 'AUTH_LOGIN'],
+  });
+
+  console.log('hasRole', hasRole);
+
   // create new role
 
   const createRole = await client.roles.appRolesControllerCreateRole({

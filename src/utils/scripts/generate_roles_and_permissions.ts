@@ -52,6 +52,8 @@ async function main() {
     ...recursivelyGetValues(PERMISSIONS.TASK),
     ...recursivelyGetValues(PERMISSIONS.ROLES),
     ...recursivelyGetValues(PERMISSIONS.PERMISSIONS),
+    ...recursivelyGetValues(PERMISSIONS.USERS),
+    PERMISSIONS.FLAGS.ADMINUI,
   ];
 
   PERMISSIONS_TO_ROLE['DEV'] = [

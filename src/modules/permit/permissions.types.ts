@@ -89,4 +89,13 @@ export const PERMISSIONS = {
     DELETE: 'ROLES_DELETE',
     GET: 'ROLES_GET',
   },
+  USERS: {
+    CREATE: 'USERS_CREATE',
+    UPDATE: 'USERS_UPDATE',
+    DELETE: 'USERS_DELETE',
+    GET: 'USERS_GET',
+  },
+  FLAGS: {
+    ADMINUI: 'FLAGS_ADMINUI',
+  },
 };
