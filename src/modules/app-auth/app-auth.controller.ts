@@ -1,7 +1,7 @@
 import { Auth } from '@/global/decorators/Auth.decorator';
 import { CurrentUser } from '@/global/decorators/CurrentUser.decorator';
 import { WithPermission } from '@/global/decorators/Permissions.decorator';
-import { AccessToken_Response } from '@/global/types/JWTAccessToken.dto';
+import { AuthResponse } from '@/global/types/AuthResponse.dto';
 import {
   Body,
   Controller,
@@ -11,6 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { TwoFAEMailAuthGuard } from '../auth/guard/2fa_email.guard';
 import { LocalAuthGuard } from '../auth/guard/local.guard';
 import { AuthService } from '../auth/services/auth.service';
 import { IChangePassword } from '../auth/types/ChangePassword.dto';
@@ -31,16 +32,33 @@ export class AppAuthController {
   @UseGuards(LocalAuthGuard)
   @WithPermission([PERMISSIONS.AUTH.LOGIN])
   @ApiBody({ type: LoginUser_Request })
-  async login(@Request() req): Promise<AccessToken_Response> {
+  async login(@Request() req): Promise<AuthResponse> {
+    // check if user has 2fa enabled
+    if (await this.authService.check2FAEmail(req.user)) {
+      return this.authService.send2FAEmail(req.user);
+    }
+
+    return this.authService.signToken(req.user);
+  }
+
+  @Post('2fa')
+  @UseGuards(TwoFAEMailAuthGuard)
+  @WithPermission([PERMISSIONS.AUTH.LOGIN])
+  @ApiBody({ type: LoginUser_Request })
+  async login2FA(@Request() req): Promise<AuthResponse> {
     return this.authService.signToken(req.user);
   }
 
   @Post('register')
   @WithPermission([PERMISSIONS.AUTH.REGISTER])
-  async register(
-    @Body() body: RegisterUser_Request,
-  ): Promise<AccessToken_Response> {
+  async register(@Body() body: RegisterUser_Request): Promise<AuthResponse> {
     const user = await this.authService.registerUser(body.email, body.password);
+
+    // check if user has 2fa enabled
+    if (await this.authService.check2FAEmail(user)) {
+      return this.authService.send2FAEmail(user);
+    }
+
     return this.authService.signToken(user);
   }
 

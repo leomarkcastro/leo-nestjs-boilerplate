@@ -42,16 +42,15 @@ model User {
 }
 
 model LocalAuth {
-  id                     String    @id @default(cuid())
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
-  User                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId                 String    @unique
-  twofa                  String?
-  lastTwoFaRequest       DateTime?
-  remainingLoginAttempts Int?
-  lastSuccessLogin       DateTime?
-  password               String
+  id                 String    @id @default(cuid())
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  User               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId             String    @unique
+  twofaEmail         Boolean?
+  twofaEmailSecret   String?
+  twofaEmailLastSent DateTime?
+  password           String
 }
 
 model Role {

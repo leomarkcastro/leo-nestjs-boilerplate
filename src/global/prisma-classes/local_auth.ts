@@ -13,17 +13,14 @@ export class LocalAuth {
   @ApiProperty({ type: String })
   userId: string;
 
+  @ApiPropertyOptional({ type: Boolean })
+  twofaEmail?: boolean;
+
   @ApiPropertyOptional({ type: String })
-  twofa?: string;
+  twofaEmailSecret?: string;
 
   @ApiPropertyOptional({ type: Date })
-  lastTwoFaRequest?: Date;
-
-  @ApiPropertyOptional({ type: Number })
-  remainingLoginAttempts?: number;
-
-  @ApiPropertyOptional({ type: Date })
-  lastSuccessLogin?: Date;
+  twofaEmailLastSent?: Date;
 
   @ApiProperty({ type: String })
   password: string;

@@ -19,6 +19,7 @@ export const CONFIG = {
   MAILER_BREVO_API_KEY: process.env.MAILER_BREVO_API_KEY || 'secret',
   MAILER_NAME: process.env.MAILER_NAME || 'mailer',
   MAILER_EMAILADDRESS: process.env.MAILER_EMAILADDRESS || 'mailer@test.com',
+  TWOFA_EMAIL_EXPIRY_TIME: process.env.TWOFA_EMAIL_EXPIRY_TIME || '300000',
   AWS_S3_ACCESS_KEY_ID: process.env.AWS_S3_ACCESS_KEY_ID || 'secret',
   AWS_S3_SECRET_ACCESS_KEY: process.env.AWS_S3_SECRET_ACCESS_KEY || 'secret',
   AWS_S3_REGION: process.env.AWS_S3_REGION || 'asia-southeast-1',

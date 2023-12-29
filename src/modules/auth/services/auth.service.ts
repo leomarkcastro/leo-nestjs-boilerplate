@@ -1,5 +1,5 @@
 import { CONFIG } from '@/config/env';
-import { AccessToken_Response } from '@/global/types/JWTAccessToken.dto';
+import { AuthResponse } from '@/global/types/AuthResponse.dto';
 import { Roles } from '@/global/types/Roles.dto';
 import { MailBrevoService } from '@/modules/mail-brevo/mail-brevo.service';
 import { PrismaService } from '@@/db-prisma/db-prisma.service';
@@ -47,9 +47,12 @@ export class AuthService {
     };
   }
 
-  async signToken(user: IUserJwt): Promise<AccessToken_Response> {
+  async signToken(user: IUserJwt): Promise<AuthResponse> {
     return {
-      accessToken: this.jwtService.sign(user),
+      type: 'JWT',
+      jwt: {
+        accessToken: this.jwtService.sign(user),
+      },
     };
   }
 
@@ -193,5 +196,112 @@ export class AuthService {
         password: hashedPassword,
       },
     });
+  }
+
+  async check2FAEmail(user: IUserJwt): Promise<boolean> {
+    const userObj = await this.database.localAuth.findUnique({
+      where: {
+        userId: user.id,
+      },
+    });
+    if (!userObj) throw new HttpException('User not found', 404);
+
+    return !!userObj.twofaEmail;
+  }
+
+  async send2FAEmail(user: IUserJwt): Promise<AuthResponse> {
+    const is2FAEmail = await this.check2FAEmail(user);
+
+    if (!is2FAEmail) {
+      throw new HttpException('2FA Email not set for current user', 400);
+    }
+
+    const localAuth = await this.database.localAuth.findUnique({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    // check if code was sent in the last 5 minutes
+    const now = new Date();
+    const lastSent = localAuth.twofaEmailLastSent || new Date(0);
+    const diff = now.getTime() - lastSent.getTime();
+    console.log(
+      diff,
+      Number(CONFIG.TWOFA_EMAIL_EXPIRY_TIME),
+      now.getTime(),
+      lastSent.getTime(),
+    );
+    if (diff > Number(CONFIG.TWOFA_EMAIL_EXPIRY_TIME)) {
+      // generate 2fa code
+      const code = Math.floor(100000 + Math.random() * 900000);
+      const codeHash = hashSync(code.toString(), 10);
+
+      // save code to database
+      await this.database.localAuth.update({
+        where: {
+          userId: user.id,
+        },
+        data: {
+          twofaEmailSecret: codeHash,
+          twofaEmailLastSent: new Date(),
+        },
+      });
+
+      // send email
+      await this.mail.sendEmailFromTemplate(
+        user.email,
+        '2FA Login',
+        "2FA Login Attempt. Ignore this email if you didn't request this.",
+        '2fa-email-login.hbs',
+        {
+          code: code.toString(),
+        },
+      );
+    }
+
+    const tokenPayload = {
+      id: user.id,
+      email: user.email,
+    };
+
+    const token = this.jwtService.sign(tokenPayload, {
+      expiresIn: '1h',
+    });
+
+    return {
+      type: '2FA_Email',
+      twoFactorEmail: {
+        token,
+      },
+    };
+  }
+
+  async verify2FAEmail(token: string, code: string): Promise<IUserJwt | null> {
+    const decoded = this.jwtService.decode(token) as IUserJwt;
+    if (!decoded) throw new HttpException('Invalid token', 400);
+
+    const userObj = await this.database.localAuth.findUnique({
+      where: {
+        userId: decoded.id,
+      },
+    });
+    if (!userObj) throw new HttpException('User not found', 404);
+
+    // check if code is valid
+    const validate = compareSync(code, userObj.twofaEmailSecret);
+    if (!validate) throw new HttpException('Invalid code', 400);
+
+    // check if code is expired
+    const now = new Date();
+    const lastSent = userObj.twofaEmailLastSent;
+    const diff = now.getTime() - lastSent.getTime();
+    if (diff > Number(CONFIG.TWOFA_EMAIL_EXPIRY_TIME))
+      throw new HttpException('Code expired', 400);
+
+    return {
+      id: decoded.id,
+      email: decoded.email,
+    };
   }
 }
