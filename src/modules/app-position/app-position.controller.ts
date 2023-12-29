@@ -1,10 +1,10 @@
 import { ApiPaginatedResponse } from '@/global/decorators/ApiPaginatedResponse.decorator';
 import { Auth } from '@/global/decorators/Auth.decorator';
 import { WithPermission } from '@/global/decorators/Permissions.decorator';
+import { Position } from '@/global/prisma-classes/position';
 import { IPagination } from '@/global/types/Pagination.dto';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { Position } from 'generated/prisma-classes/position';
 import { PERMISSIONS } from '../permit/permissions.types';
 import { AppPositionService } from './app-position.service';
 import { PositionWithUsers } from './dto/PositionWithUsers.dto';

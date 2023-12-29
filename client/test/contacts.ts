@@ -1,3 +1,4 @@
+import { AuthResponse } from '../api';
 import { api } from './_client_gen';
 import { PREAUTH } from './preAuths';
 
@@ -13,7 +14,9 @@ async function main() {
   console.log('login', login);
 
   // Me
-  client.request.config.TOKEN = login.accessToken;
+  if (login.type === AuthResponse.type.JWT) {
+    client.request.config.TOKEN = login.jwt.accessToken;
+  }
 
   // get all contacts
 
@@ -52,6 +55,12 @@ async function main() {
   const recontacts = await client.contacts.appContactsControllerFindAll();
 
   console.log('contacts', recontacts);
+
+  // search a contact
+
+  const oneContact = await client.contacts.appContactsControllerFindAll('Doe');
+
+  console.log('oneContact', oneContact);
 
   // delete contact
 

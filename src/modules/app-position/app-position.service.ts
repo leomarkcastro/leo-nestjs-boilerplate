@@ -1,5 +1,9 @@
 import { Position } from '@/global/prisma-classes/position';
 import {
+  basicSearch,
+  paginationObject,
+} from '@/global/prisma/pagination_object';
+import {
   IPagination,
   IPaginationResponse,
 } from '@/global/types/Pagination.dto';
@@ -47,24 +51,9 @@ export class AppPositionService {
     pagination: IPagination,
   ): Promise<IPaginationResponse<Position>> {
     const query: Prisma.PositionFindManyArgs = {
-      take: pagination.limit,
-      skip: (pagination.page - 1) * pagination.limit,
-      orderBy: {
-        [pagination.sortBy]: pagination.sortDesc ? 'desc' : 'asc',
-      },
+      ...paginationObject(pagination, basicSearch(pagination, ['name'])),
     };
-    if (pagination.search && pagination.search.length > 0) {
-      query.where = {
-        OR: [
-          {
-            name: {
-              contains: pagination.search,
-              mode: 'insensitive',
-            },
-          },
-        ],
-      };
-    }
+
     const data = await this.db.position.findMany({
       ...query,
     });
@@ -82,24 +71,9 @@ export class AppPositionService {
     pagination: IPagination,
   ): Promise<IPaginationResponse<PositionWithUsers>> {
     const query: Prisma.PositionFindManyArgs = {
-      take: pagination.limit,
-      skip: (pagination.page - 1) * pagination.limit,
-      orderBy: {
-        [pagination.sortBy]: pagination.sortDesc ? 'desc' : 'asc',
-      },
+      ...paginationObject(pagination, basicSearch(pagination, ['name'])),
     };
-    if (pagination.search && pagination.search.length > 0) {
-      query.where = {
-        OR: [
-          {
-            name: {
-              contains: pagination.search,
-              mode: 'insensitive',
-            },
-          },
-        ],
-      };
-    }
+
     const data = await this.db.position.findMany({
       ...query,
       include: {

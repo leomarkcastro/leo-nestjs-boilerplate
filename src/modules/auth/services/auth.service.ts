@@ -83,6 +83,35 @@ export class AuthService {
     };
   }
 
+  async newAccountResetPassword(email: string) {
+    const user = await this.database.user.findUnique({
+      where: { email },
+    });
+    if (!user) return;
+
+    const resetPassword: IResetPasswordJWT = {
+      id: user.id,
+      email: user.email,
+      resetPassword: true,
+    };
+
+    const token = this.jwtService.sign(resetPassword, {
+      expiresIn: '3d',
+    });
+
+    // send email
+    await this.mail.sendEmailFromTemplate(
+      user.email,
+      'New Account Setup',
+      'Welcome to BDB Portal. Click the button below to start setting the password for your account.',
+      'new-account.hbs',
+      {
+        username: user.email,
+        reset_url: `${CONFIG.PAGE_URL}${CONFIG.NEW_ACCOUNT_URL}?token=${token}`,
+      },
+    );
+  }
+
   async requestResetPassword(email: string) {
     const user = await this.database.user.findUnique({
       where: { email },

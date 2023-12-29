@@ -6,7 +6,7 @@ import { CalendarAccess } from '../app-events/dto/CalendarAccess.dto';
 import { FileOwnershipType } from '../app-file/dto/FileOwnership.dto';
 import { BoardAccess } from '../app-task/dto/BoardAccess.dto';
 
-@Controller('app-enums')
+@Controller('enums')
 @ApiTags('enums')
 export class AppEnumsController {
   @Get('basic-access')

@@ -4,20 +4,14 @@ import { WithPermission } from '@/global/decorators/Permissions.decorator';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { IUserJwt } from '../auth/types/UserJWT.dto';
-import { PrismaService } from '../db-prisma/db-prisma.service';
 import { PERMISSIONS } from '../permit/permissions.types';
-import { PermitService } from '../permit/permit.service';
 import { AppRolesService } from './app-roles.service';
 import { CreateRole, PermissionToCheck } from './dto/RoleObjects.dto';
 
-@Controller('app-roles')
+@Controller('roles')
 @ApiTags('roles')
 export class AppRolesController {
-  constructor(
-    private readonly db: PrismaService,
-    private readonly permit: PermitService,
-    private readonly service: AppRolesService,
-  ) {}
+  constructor(private readonly service: AppRolesService) {}
 
   // ===================================== ROLES
 

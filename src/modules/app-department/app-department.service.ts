@@ -1,5 +1,9 @@
 import { Department } from '@/global/prisma-classes/department';
 import {
+  basicSearch,
+  paginationObject,
+} from '@/global/prisma/pagination_object';
+import {
   IPagination,
   IPaginationResponse,
 } from '@/global/types/Pagination.dto';
@@ -40,24 +44,8 @@ export class AppDepartmentService {
     pagination: IPagination,
   ): Promise<IPaginationResponse<Department>> {
     const query: Prisma.DepartmentFindManyArgs = {
-      take: pagination.limit,
-      skip: (pagination.page - 1) * pagination.limit,
-      orderBy: {
-        [pagination.sortBy]: pagination.sortDesc ? 'desc' : 'asc',
-      },
+      ...paginationObject(pagination, basicSearch(pagination, ['name'])),
     };
-    if (pagination.search && pagination.search.length > 0) {
-      query.where = {
-        OR: [
-          {
-            name: {
-              contains: pagination.search,
-              mode: 'insensitive',
-            },
-          },
-        ],
-      };
-    }
     const data = await this.db.department.findMany(query);
     const total = await this.db.department.count();
 
@@ -73,24 +61,8 @@ export class AppDepartmentService {
     pagination: IPagination,
   ): Promise<IPaginationResponse<DepartmentWithUsers>> {
     const query: Prisma.DepartmentFindManyArgs = {
-      take: pagination.limit,
-      skip: (pagination.page - 1) * pagination.limit,
-      orderBy: {
-        [pagination.sortBy]: pagination.sortDesc ? 'desc' : 'asc',
-      },
+      ...paginationObject(pagination, basicSearch(pagination, ['name'])),
     };
-    if (pagination.search && pagination.search.length > 0) {
-      query.where = {
-        OR: [
-          {
-            name: {
-              contains: pagination.search,
-              mode: 'insensitive',
-            },
-          },
-        ],
-      };
-    }
     const data = await this.db.department.findMany({
       ...query,
       include: {

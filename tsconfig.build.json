@@ -7,6 +7,6 @@
     "**/*spec.ts",
     "generated",
     "client",
-    "template"
+    "templates"
   ]
 }
