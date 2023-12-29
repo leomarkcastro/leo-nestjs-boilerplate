@@ -202,7 +202,6 @@ export class AppEventsService {
 
     const query: Prisma.EventFindManyArgs = {
       where: {
-        calendarId: data.id,
         OR: [
           // (loadingTime <= dateRange.start && endTime > dateRange.start) ||
           {
@@ -240,7 +239,31 @@ export class AppEventsService {
       },
     };
 
-    return await this.db.event.findMany(query);
+    if (data.id) {
+      query.where = {
+        ...query.where,
+        calendarId: data.id,
+      };
+    }
+
+    let events = await this.db.event.findMany({
+      ...query,
+      include: {
+        Calendar: true,
+      },
+    });
+
+    // Either use events custom color or calendar color
+    events = events.map((event) => {
+      return {
+        ...event,
+        backgroundColor:
+          event.backgroundColor ?? event.Calendar.backgroundColor,
+        textColor: event.textColor ?? event.Calendar.textColor,
+      };
+    });
+
+    return events;
   }
 
   // update details

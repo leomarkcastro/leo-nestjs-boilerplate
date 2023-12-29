@@ -27,6 +27,7 @@ export class CreateCalendarDto {
 export class UpdateCalendarDto extends PartialType(CreateCalendarDto) {}
 
 export class QueryCalendarDto {
+  @IsOptional()
   @IsString()
   id: string;
 
