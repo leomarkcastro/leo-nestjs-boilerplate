@@ -50,6 +50,8 @@ async function main() {
     ...recursivelyGetValues(PERMISSIONS.NOTIF),
     ...recursivelyGetValues(PERMISSIONS.POSITIONS),
     ...recursivelyGetValues(PERMISSIONS.TASK),
+    ...recursivelyGetValues(PERMISSIONS.ROLES),
+    ...recursivelyGetValues(PERMISSIONS.PERMISSIONS),
   ];
 
   PERMISSIONS_TO_ROLE['DEV'] = [
@@ -129,6 +131,7 @@ async function main() {
     }
   }
 
+  console.log('Correcting permissions on roles drift');
   // delete all PermissionOnRole that is not in PERMISSIONS_TO_ROLE
   const permissionOnRoles = await prisma.permissionOnRole.findMany();
   for (const permissionOnRole of permissionOnRoles) {

@@ -15,6 +15,8 @@ import { MailBrevoModule } from './modules/mail-brevo/mail-brevo.module';
 import { MinioModule } from './modules/minio/minio.module';
 import { PermitModule } from './modules/permit/permit.module';
 import { TemplatesModule } from './modules/templates/templates.module';
+import { AppEnumsModule } from './modules/app-enums/app-enums.module';
+import { AppRolesModule } from './modules/app-roles/app-roles.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { TemplatesModule } from './modules/templates/templates.module';
     AppDepartmentModule,
     AppPositionModule,
     AppContactsModule,
+    AppEnumsModule,
+    AppRolesModule,
   ],
 })
 export class AppModule {}
