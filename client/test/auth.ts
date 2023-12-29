@@ -1,3 +1,4 @@
+import { AuthResponse } from '../api';
 import { api, randomString } from './_client_gen';
 
 async function main() {
@@ -22,8 +23,9 @@ async function main() {
 
   console.log('login', login);
 
-  // Me
-  client.request.config.TOKEN = login.accessToken;
+  if (login.type === AuthResponse.type.JWT) {
+    client.request.config.TOKEN = login.jwt.accessToken;
+  }
 
   const me = await client.auth.appAuthControllerMe();
 

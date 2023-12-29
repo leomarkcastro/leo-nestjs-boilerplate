@@ -149,7 +149,9 @@ export class AuthService {
       email: userObj.email,
       firstName: userObj.firstName,
       lastName: userObj.lastName,
-      fullName: `${userObj.firstName} ${userObj.lastName}`,
+      fullName: `${userObj.firstName ?? ''}${userObj.lastName ? ' ' : ''}${
+        userObj.lastName ?? ''
+      }`,
       userName: userObj.firstName,
       avatar: userObj.avatar,
       role: userObj.Role?.name,
