@@ -18,18 +18,23 @@ export class PermissionOnRoleWithPermission extends PermissionOnRole {
   Permission: Permission;
 }
 
-function recursivelyGetValues(obj: any) {
+function recursivelyGetValuesNoDuplicate(obj: any) {
   const values: string[] = [];
   for (const key in obj) {
     if (typeof obj[key] === 'object') {
-      values.push(...recursivelyGetValues(obj[key]));
+      values.push(...recursivelyGetValuesNoDuplicate(obj[key]));
     } else {
       values.push(obj[key]);
     }
   }
-  return values;
+
+  // remove duplicates
+
+  const uniqueValues = [...new Set(values)];
+
+  return uniqueValues;
 }
-const flatPermissionList = recursivelyGetValues(PERMISSIONS);
+const flatPermissionList = recursivelyGetValuesNoDuplicate(PERMISSIONS);
 
 export class PermissionToCheck {
   @ApiProperty({ enum: flatPermissionList, isArray: true })

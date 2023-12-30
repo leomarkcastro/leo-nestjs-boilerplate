@@ -63,7 +63,7 @@ export class TestController {
       'nestjs-template-test',
       fileLocation,
     );
-    res.writeHead(200, {
+    res.writeHead(201, {
       'Content-Type': file.mime,
     });
     file.stream.on('data', async function (chunk) {

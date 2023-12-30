@@ -5,7 +5,7 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 @ApiTags('health')
 export class HealthController {
   @Get()
-  @ApiResponse({ status: 200, description: 'OK' })
+  @ApiResponse({ status: 201, description: 'OK' })
   async ping_healthCheck() {
     return 'OK';
   }

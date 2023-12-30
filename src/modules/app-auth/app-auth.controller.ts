@@ -72,7 +72,7 @@ export class AppAuthController {
   }
 
   @Post('request-reset')
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 201 })
   @WithPermission([PERMISSIONS.AUTH.RESET_PASSWORD])
   async auth_requestResetPassword(
     @Body() body: StartResetPasswordUser_Request,
@@ -83,7 +83,7 @@ export class AppAuthController {
 
   @WithPermission([PERMISSIONS.AUTH.RESET_PASSWORD])
   @Post('reset-password')
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 201 })
   async auth_resetPassword(@Body() body: ResetPasswordUser_Request) {
     await this.authService.resetPassword(body.token, body.password);
     return 'OK';
@@ -102,7 +102,7 @@ export class AppAuthController {
   @Post('change-password')
   @WithPermission([PERMISSIONS.AUTH.CHANGE_PASSWORD])
   @Auth()
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 201 })
   async auth_changePassword(
     @CurrentUser() user: IUserJwt,
     @Body() update: IChangePassword,

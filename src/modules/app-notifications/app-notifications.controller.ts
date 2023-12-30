@@ -42,7 +42,7 @@ export class AppNotificationsController {
   @Post('delete')
   @WithPermission([PERMISSIONS.NOTIF.DELETE])
   @Auth()
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 201 })
   async nofitications_delete(
     @CurrentUser() user: IUserJwt,
     @Body() toDelete: NotificationDeleteDto,
