@@ -41,11 +41,11 @@ export class AppAuthController {
     return this.authService.signToken(req.user);
   }
 
-  @Post('2fa')
+  @Post('twofa')
   @UseGuards(TwoFAEMailAuthGuard)
   @WithPermission([PERMISSIONS.AUTH.LOGIN])
   @ApiBody({ type: LoginUser_Request })
-  async auth_login_2fa(@Request() req): Promise<AuthResponse> {
+  async auth_login_twofa(@Request() req): Promise<AuthResponse> {
     return this.authService.signToken(req.user);
   }
 
