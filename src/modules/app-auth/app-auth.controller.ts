@@ -32,7 +32,7 @@ export class AppAuthController {
   @UseGuards(LocalAuthGuard)
   @WithPermission([PERMISSIONS.AUTH.LOGIN])
   @ApiBody({ type: LoginUser_Request })
-  async login(@Request() req): Promise<AuthResponse> {
+  async auth_login(@Request() req): Promise<AuthResponse> {
     // check if user has 2fa enabled
     if (await this.authService.check2FAEmail(req.user)) {
       return this.authService.send2FAEmail(req.user);
@@ -45,13 +45,15 @@ export class AppAuthController {
   @UseGuards(TwoFAEMailAuthGuard)
   @WithPermission([PERMISSIONS.AUTH.LOGIN])
   @ApiBody({ type: LoginUser_Request })
-  async login2FA(@Request() req): Promise<AuthResponse> {
+  async auth_login_2fa(@Request() req): Promise<AuthResponse> {
     return this.authService.signToken(req.user);
   }
 
   @Post('register')
   @WithPermission([PERMISSIONS.AUTH.REGISTER])
-  async register(@Body() body: RegisterUser_Request): Promise<AuthResponse> {
+  async auth_register(
+    @Body() body: RegisterUser_Request,
+  ): Promise<AuthResponse> {
     const user = await this.authService.registerUser(body.email, body.password);
 
     // check if user has 2fa enabled
@@ -65,14 +67,16 @@ export class AppAuthController {
   @Get('me')
   @WithPermission([PERMISSIONS.AUTH.ME])
   @Auth()
-  async me(@CurrentUser() user: IUserJwt): Promise<IUserMe> {
+  async auth_getMe(@CurrentUser() user: IUserJwt): Promise<IUserMe> {
     return await this.authService.getMe(user);
   }
 
   @Post('request-reset')
   @ApiResponse({ status: 200 })
   @WithPermission([PERMISSIONS.AUTH.RESET_PASSWORD])
-  async requestResetPassword(@Body() body: StartResetPasswordUser_Request) {
+  async auth_requestResetPassword(
+    @Body() body: StartResetPasswordUser_Request,
+  ) {
     await this.authService.requestResetPassword(body.email);
     return 'OK';
   }
@@ -80,7 +84,7 @@ export class AppAuthController {
   @WithPermission([PERMISSIONS.AUTH.RESET_PASSWORD])
   @Post('reset-password')
   @ApiResponse({ status: 200 })
-  async resetPassword(@Body() body: ResetPasswordUser_Request) {
+  async auth_resetPassword(@Body() body: ResetPasswordUser_Request) {
     await this.authService.resetPassword(body.token, body.password);
     return 'OK';
   }
@@ -88,7 +92,7 @@ export class AppAuthController {
   @Post('update')
   @WithPermission([PERMISSIONS.AUTH.UPDATEME])
   @Auth()
-  async update(
+  async auth_update(
     @CurrentUser() user: IUserJwt,
     @Body() update: PartialUpdatableUser,
   ): Promise<IUserMe> {
@@ -99,7 +103,7 @@ export class AppAuthController {
   @WithPermission([PERMISSIONS.AUTH.CHANGE_PASSWORD])
   @Auth()
   @ApiResponse({ status: 200 })
-  async changePassword(
+  async auth_changePassword(
     @CurrentUser() user: IUserJwt,
     @Body() update: IChangePassword,
   ) {

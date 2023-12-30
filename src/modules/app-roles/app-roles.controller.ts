@@ -19,7 +19,7 @@ export class AppRolesController {
   @Get('roles/list')
   @WithPermission([PERMISSIONS.ROLES.GET])
   @Auth()
-  async getRolesList() {
+  async roles_getList() {
     return await this.service.getRolesList();
   }
 
@@ -27,7 +27,7 @@ export class AppRolesController {
   @Get('roles/info')
   @WithPermission([PERMISSIONS.ROLES.GET])
   @Auth()
-  async getRoles() {
+  async roles_getDetailedList() {
     return await this.service.getRolesInfo();
   }
 
@@ -35,7 +35,7 @@ export class AppRolesController {
   @Post('roles/create')
   @WithPermission([PERMISSIONS.ROLES.CREATE])
   @Auth()
-  async createRole(@Body() data: CreateRole) {
+  async roles_create(@Body() data: CreateRole) {
     return await this.service.createRole(data);
   }
 
@@ -43,7 +43,7 @@ export class AppRolesController {
   @Post('roles/update/:id')
   @WithPermission([PERMISSIONS.ROLES.UPDATE])
   @Auth()
-  async updateRole(@Param('id') id: string, @Body() data: CreateRole) {
+  async roles_update(@Param('id') id: string, @Body() data: CreateRole) {
     return await this.service.updateRole(id, data);
   }
 
@@ -51,7 +51,7 @@ export class AppRolesController {
   @Post('roles/delete/:id')
   @WithPermission([PERMISSIONS.ROLES.DELETE])
   @Auth()
-  async deleteRole(@Param('id') id: string) {
+  async roles_delete(@Param('id') id: string) {
     return await this.service.deleteRole(id);
   }
 
@@ -61,7 +61,7 @@ export class AppRolesController {
   @Get('permissions')
   @WithPermission([PERMISSIONS.PERMISSIONS.GET])
   @Auth()
-  async getPermissions() {
+  async roles_permissions_get() {
     return await this.service.getPermissions();
   }
 
@@ -69,7 +69,7 @@ export class AppRolesController {
   @Post('permissions/apply/:roleId')
   @WithPermission([PERMISSIONS.PERMISSIONS.MODIFY])
   @Auth()
-  async applyPermissions(
+  async roles_permissions_applyPermission(
     @Param('roleId') roleId: string,
     @Body() permissionIds: string[],
   ) {
@@ -80,7 +80,7 @@ export class AppRolesController {
   @Post('permissions/remove/:roleId')
   @WithPermission([PERMISSIONS.PERMISSIONS.MODIFY])
   @Auth()
-  async removePermissions(
+  async roles_permissions_removePermission(
     @Param('roleId') roleId: string,
     @Body() permissionIds: string[],
   ) {
@@ -92,14 +92,14 @@ export class AppRolesController {
   // get roles on user
   @Get('my-role')
   @Auth()
-  async getMyRoles(@CurrentUser() user: IUserJwt) {
+  async roles_permissions_me_roles(@CurrentUser() user: IUserJwt) {
     return await this.service.checkRole(user);
   }
 
   // get my permissions
   @Post('check-permissions')
   @Auth()
-  async getMyPermissions(
+  async roles_permissions_me_permissionCHeck(
     @CurrentUser() user: IUserJwt,
     @Body() body: PermissionToCheck,
   ) {

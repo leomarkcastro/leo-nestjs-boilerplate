@@ -11,25 +11,25 @@ import { BoardAccess } from '../app-task/dto/BoardAccess.dto';
 export class AppEnumsController {
   @Get('basic-access')
   @Auth()
-  async getBasicAccess(): Promise<string[]> {
+  async enums_getBasicAccess(): Promise<string[]> {
     return Object.values(BasicOwnershipType);
   }
 
   @Get('calendar-access')
   @Auth()
-  async getCalendarAccess(): Promise<string[]> {
+  async enums_getCalendarAccess(): Promise<string[]> {
     return Object.values(CalendarAccess);
   }
 
   @Get('file-ownership')
   @Auth()
-  async getFileAccess(): Promise<string[]> {
+  async enums_getFileAccess(): Promise<string[]> {
     return Object.values(FileOwnershipType);
   }
 
   @Get('board-access')
   @Auth()
-  async getBoardAccess(): Promise<string[]> {
+  async enums_getBoardAccess(): Promise<string[]> {
     return Object.values(BoardAccess);
   }
 }

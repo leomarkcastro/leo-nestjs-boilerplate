@@ -22,14 +22,14 @@ export class AppPositionController {
   @Post('create')
   @WithPermission([PERMISSIONS.POSITIONS.CREATE])
   @Auth()
-  create(@Body() createAppDepartmentDto: CreateAppPositionDto) {
+  position_create(@Body() createAppDepartmentDto: CreateAppPositionDto) {
     return this.service.create(createAppDepartmentDto);
   }
 
   @Post('update/:id')
   @WithPermission([PERMISSIONS.POSITIONS.UPDATE])
   @Auth()
-  update(
+  position_update(
     @Param('id') id: string,
     @Body() updateAppDepartmentDto: UpdateAppPositionDto,
   ) {
@@ -39,14 +39,17 @@ export class AppPositionController {
   @Post('members/add/:id')
   @WithPermission([PERMISSIONS.POSITIONS.UPDATE])
   @Auth()
-  membersAdd(@Param('id') id: string, @Body() manageMembers: ManageMembersDto) {
+  position_membersAdd(
+    @Param('id') id: string,
+    @Body() manageMembers: ManageMembersDto,
+  ) {
     return this.service.addMembers(id, manageMembers);
   }
 
   @Post('members/remove/:id')
   @WithPermission([PERMISSIONS.POSITIONS.UPDATE])
   @Auth()
-  membersRemove(
+  position_membersRemove(
     @Param('id') id: string,
     @Body() manageMembers: ManageMembersDto,
   ) {
@@ -56,7 +59,7 @@ export class AppPositionController {
   @Post('delete/:id')
   @WithPermission([PERMISSIONS.POSITIONS.DELETE])
   @Auth()
-  remove(@Param('id') id: string) {
+  position_remove(@Param('id') id: string) {
     return this.service.remove(id);
   }
 
@@ -64,7 +67,7 @@ export class AppPositionController {
   @WithPermission([PERMISSIONS.POSITIONS.GET])
   @Auth()
   @ApiPaginatedResponse(PositionWithUsers)
-  findAllDetailed(@Query() pagination: IPagination) {
+  position_findAllDetailed(@Query() pagination: IPagination) {
     return this.service.listAllMembers(pagination);
   }
 
@@ -72,7 +75,7 @@ export class AppPositionController {
   @WithPermission([PERMISSIONS.POSITIONS.GET])
   @Auth()
   @ApiPaginatedResponse(Position)
-  findAll(@Query() pagination: IPagination) {
+  position_findAll(@Query() pagination: IPagination) {
     return this.service.getPositions(pagination);
   }
 }

@@ -25,7 +25,7 @@ export class AppFileController {
   @Post('presigned')
   @WithPermission([PERMISSIONS.FILE.UPLOAD_PRESIGNED])
   @Auth()
-  async generatePresignedUrls(
+  async uploads_generatePresignedUrls(
     @Body() body: PresignedFileUpload_Body,
   ): Promise<PresignedFileUpload_Response[]> {
     const urls = await this.minio.generatePresignedUploadUrls(body.fileNames);
@@ -35,7 +35,7 @@ export class AppFileController {
   @Post('createobject')
   @WithPermission([PERMISSIONS.FILE.UPLOAD_CREATEOBJECT])
   @Auth()
-  async createObject(
+  async uploads_createObject(
     @CurrentUser() user: IUserJwt,
     @Body() body: CreateFileObjectDTO,
   ): Promise<DatabaseFileObject[]> {

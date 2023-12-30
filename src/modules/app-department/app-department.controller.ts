@@ -22,7 +22,7 @@ export class AppDepartmentController {
   @Post('create')
   @WithPermission([PERMISSIONS.DEPARTMENTS.CREATE])
   @Auth()
-  create(
+  department_create(
     @Body() createAppDepartmentDto: CreateAppDepartmentDto,
   ): Promise<Department> {
     return this.appDepartmentService.create(createAppDepartmentDto);
@@ -31,7 +31,7 @@ export class AppDepartmentController {
   @Post('update/:id')
   @WithPermission([PERMISSIONS.DEPARTMENTS.UPDATE])
   @Auth()
-  update(
+  department_update(
     @Param('id') id: string,
     @Body() updateAppDepartmentDto: UpdateAppDepartmentDto,
   ): Promise<Department> {
@@ -41,7 +41,7 @@ export class AppDepartmentController {
   @Post('members/add/:id')
   @WithPermission([PERMISSIONS.DEPARTMENTS.UPDATE])
   @Auth()
-  membersAdd(
+  department_membersAdd(
     @Param('id') id: string,
     @Body() manageMembers: ManageMembersDto,
   ): Promise<DepartmentWithUsers> {
@@ -51,7 +51,7 @@ export class AppDepartmentController {
   @Post('members/remove/:id')
   @WithPermission([PERMISSIONS.DEPARTMENTS.UPDATE])
   @Auth()
-  membersRemove(
+  department_membersRemove(
     @Param('id') id: string,
     @Body() manageMembers: ManageMembersDto,
   ): Promise<DepartmentWithUsers> {
@@ -61,7 +61,7 @@ export class AppDepartmentController {
   @Post('delete/:id')
   @WithPermission([PERMISSIONS.DEPARTMENTS.DELETE])
   @Auth()
-  remove(@Param('id') id: string): Promise<Department> {
+  department_remove(@Param('id') id: string): Promise<Department> {
     return this.appDepartmentService.remove(id);
   }
 
@@ -69,7 +69,7 @@ export class AppDepartmentController {
   @WithPermission([PERMISSIONS.DEPARTMENTS.GET])
   @Auth()
   @ApiPaginatedResponse(DepartmentWithUsers)
-  findAllDetailed(@Query() pagination: IPagination) {
+  department_findAllDetailed(@Query() pagination: IPagination) {
     return this.appDepartmentService.listAllMembers(pagination);
   }
 
@@ -77,7 +77,7 @@ export class AppDepartmentController {
   @WithPermission([PERMISSIONS.DEPARTMENTS.GET])
   @Auth()
   @ApiPaginatedResponse(Department)
-  findAll(@Query() pagination: IPagination) {
+  department_findAll(@Query() pagination: IPagination) {
     return this.appDepartmentService.getDepartments(pagination);
   }
 }

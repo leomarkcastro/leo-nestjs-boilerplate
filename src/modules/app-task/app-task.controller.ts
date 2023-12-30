@@ -35,7 +35,7 @@ export class AppTaskController {
   @Post('board/create')
   @WithPermission([PERMISSIONS.TASK.BOARD.CREATE])
   @Auth()
-  async createBoard(
+  async task_board_create(
     @CurrentUser() user: IUserJwt,
     @Body() data: CreateBoardDto,
   ) {
@@ -65,7 +65,7 @@ export class AppTaskController {
   @Post('board/update/:id')
   @WithPermission([PERMISSIONS.TASK.BOARD.UPDATE])
   @Auth()
-  async updateBoard(
+  async task_board_update(
     @CurrentUser() user: IUserJwt,
     @Param('id') id: string,
     @Body() data: UpdateBoardDto,
@@ -78,7 +78,7 @@ export class AppTaskController {
   @Post('board/add-members/:id')
   @WithPermission([PERMISSIONS.TASK.BOARD.ADD_MEMBERS])
   @Auth()
-  async addMembersToBoard(
+  async task_board_addMembers(
     @CurrentUser() user: IUserJwt,
     @Param('id') id: string,
     @Body() data: ManageMembersListRequest,
@@ -91,7 +91,7 @@ export class AppTaskController {
   @Post('board/modify-members/:id')
   @WithPermission([PERMISSIONS.TASK.BOARD.MODIFY_MEMBERS])
   @Auth()
-  async modifyMembersOnBoard(
+  async task_board_modifyMembers(
     @CurrentUser() user: IUserJwt,
     @Param('id') id: string,
     @Body() data: ManageMembersListRequest,
@@ -104,7 +104,7 @@ export class AppTaskController {
   @Post('board/delete-members/:id')
   @WithPermission([PERMISSIONS.TASK.BOARD.DELETE_MEMBERS])
   @Auth()
-  async deleteMembersOnBoard(
+  async task_board_deleteMembers(
     @CurrentUser() user: IUserJwt,
     @Param('id') id: string,
     @Body() data: ManageMembersListRequest,
@@ -117,7 +117,10 @@ export class AppTaskController {
   @Post('board/delete/:id')
   @WithPermission([PERMISSIONS.TASK.BOARD.DELETE])
   @Auth()
-  async deleteBoard(@CurrentUser() user: IUserJwt, @Param('id') id: string) {
+  async task_board_delete(
+    @CurrentUser() user: IUserJwt,
+    @Param('id') id: string,
+  ) {
     await this.checkBoardAdmin(user, id);
     return await this.service.deleteBoard(id);
   }
@@ -126,7 +129,7 @@ export class AppTaskController {
   @Post('board/get')
   @WithPermission([PERMISSIONS.TASK.BOARD.GET])
   @Auth()
-  async getBoard(@CurrentUser() user: IUserJwt) {
+  async task_board_getList(@CurrentUser() user: IUserJwt) {
     return await this.service.getBoard(user);
   }
 
@@ -224,7 +227,10 @@ export class AppTaskController {
   @Post('list/create')
   @WithPermission([PERMISSIONS.TASK.LIST.CREATE])
   @Auth()
-  async createList(@CurrentUser() user: IUserJwt, @Body() data: CreateListDto) {
+  async task_list_create(
+    @CurrentUser() user: IUserJwt,
+    @Body() data: CreateListDto,
+  ) {
     await this.checkListMemberByBoard(user, data.boardId);
     return await this.service.createBoardList(data);
   }
@@ -233,7 +239,7 @@ export class AppTaskController {
   @Post('list/update/:id')
   @WithPermission([PERMISSIONS.TASK.LIST.UPDATE])
   @Auth()
-  async updateList(
+  async task_list_update(
     @CurrentUser() user: IUserJwt,
     @Param('id') id: string,
     @Body() data: UpdateListDto,
@@ -246,7 +252,10 @@ export class AppTaskController {
   @Post('list/delete/:id')
   @WithPermission([PERMISSIONS.TASK.LIST.DELETE])
   @Auth()
-  async deleteList(@CurrentUser() user: IUserJwt, @Param('id') id: string) {
+  async task_list_delete(
+    @CurrentUser() user: IUserJwt,
+    @Param('id') id: string,
+  ) {
     await this.checkListMemberByList(user, id);
     return await this.service.deleteBoardList(id);
   }
@@ -255,7 +264,10 @@ export class AppTaskController {
   @Post('get/:id')
   @WithPermission([PERMISSIONS.TASK.LIST.GET])
   @Auth()
-  async getTask(@CurrentUser() user: IUserJwt, @Param('id') id: string) {
+  async task_list_getDetailedList(
+    @CurrentUser() user: IUserJwt,
+    @Param('id') id: string,
+  ) {
     await this.checkListMemberByBoard(user, id, true);
     return await this.service.getListOnBoard(id);
   }
@@ -266,7 +278,10 @@ export class AppTaskController {
   @Post('create')
   @WithPermission([PERMISSIONS.TASK.TASK.CREATE])
   @Auth()
-  async createTask(@CurrentUser() user: IUserJwt, @Body() data: CreateTaskDto) {
+  async task_create(
+    @CurrentUser() user: IUserJwt,
+    @Body() data: CreateTaskDto,
+  ) {
     await this.checkListMemberByList(user, data.listId);
     return await this.service.create(data);
   }
@@ -275,7 +290,7 @@ export class AppTaskController {
   @Post('update/:id')
   @WithPermission([PERMISSIONS.TASK.TASK.UPDATE])
   @Auth()
-  async updateTask(
+  async task_update(
     @CurrentUser() user: IUserJwt,
     @Param('id') id: string,
     @Body() data: UpdateTaskDto,
@@ -288,7 +303,7 @@ export class AppTaskController {
   @Post('add-file/:id')
   @WithPermission([PERMISSIONS.TASK.TASK.ADD_FILE])
   @Auth()
-  async addFileToTask(
+  async task_addFile(
     @CurrentUser() user: IUserJwt,
     @Param('id') id: string,
     @Body() files: ModifyTaskFileListDto,
@@ -301,7 +316,7 @@ export class AppTaskController {
   @Post('delete-file/:id')
   @WithPermission([PERMISSIONS.TASK.TASK.DELETE_FILE])
   @Auth()
-  async deleteFileToTask(
+  async task_removeFile(
     @CurrentUser() user: IUserJwt,
     @Param('id') id: string,
     @Body() files: ModifyTaskFileListDto,
@@ -314,7 +329,7 @@ export class AppTaskController {
   @Post('delete/:id')
   @WithPermission([PERMISSIONS.TASK.TASK.DELETE])
   @Auth()
-  async deleteTask(@CurrentUser() user: IUserJwt, @Param('id') id: string) {
+  async task_delete(@CurrentUser() user: IUserJwt, @Param('id') id: string) {
     await this.checkListMemberByTask(user, id);
     return await this.service.delete(id);
   }

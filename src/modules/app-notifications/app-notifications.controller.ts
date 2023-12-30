@@ -21,7 +21,7 @@ export class AppNotificationsController {
   @Get()
   @WithPermission([PERMISSIONS.NOTIF.READ])
   @Auth()
-  async getNotifications(
+  async nofitications_get(
     @CurrentUser() user: IUserJwt,
     @Query() pagination: IPagination,
   ): Promise<NotificationClass[]> {
@@ -31,7 +31,7 @@ export class AppNotificationsController {
   @Post('broadcast')
   @WithPermission([PERMISSIONS.NOTIF.CREATE])
   @Auth()
-  async broadcast(
+  async nofitications_broadcast(
     @CurrentUser() user: IUserJwt,
     @Body() body: CreateBroadcastNotificationDto,
   ): Promise<NotificationClass> {
@@ -43,7 +43,7 @@ export class AppNotificationsController {
   @WithPermission([PERMISSIONS.NOTIF.DELETE])
   @Auth()
   @ApiResponse({ status: 200 })
-  async deleteNotification(
+  async nofitications_delete(
     @CurrentUser() user: IUserJwt,
     @Body() toDelete: NotificationDeleteDto,
   ) {

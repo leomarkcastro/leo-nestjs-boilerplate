@@ -25,7 +25,7 @@ export class AppUsersController {
   @Get('id/:id')
   @WithPermission([PERMISSIONS.USERS.GET])
   @Auth()
-  getOne(@Param('id') id: string) {
+  users_getOne(@Param('id') id: string) {
     return this.service.getUser(id);
   }
 
@@ -34,7 +34,7 @@ export class AppUsersController {
   @WithPermission([PERMISSIONS.USERS.GET])
   @Auth()
   @ApiPaginatedResponse(UserWithRelations)
-  getList(@Query() pagination: IPagination) {
+  users_getList(@Query() pagination: IPagination) {
     return this.service.getUsers(pagination);
   }
 
@@ -42,7 +42,7 @@ export class AppUsersController {
   @Post('create')
   @WithPermission([PERMISSIONS.USERS.CREATE])
   @Auth()
-  async create(@Body() data: UserCreate) {
+  async users_create(@Body() data: UserCreate) {
     const user = await this.service.createUser(data);
     await this.authService.newAccountResetPassword(user.email);
 
@@ -53,7 +53,7 @@ export class AppUsersController {
   @Post('update/:id')
   @WithPermission([PERMISSIONS.USERS.UPDATE])
   @Auth()
-  update(@Param('id') id: string, @Body() data: UserUpdate) {
+  users_update(@Param('id') id: string, @Body() data: UserUpdate) {
     return this.service.updateUser(id, data);
   }
 
@@ -61,7 +61,7 @@ export class AppUsersController {
   @Post('delete/:id')
   @WithPermission([PERMISSIONS.USERS.DELETE])
   @Auth()
-  delete(@Param('id') id: string) {
+  users_delete(@Param('id') id: string) {
     return this.service.deleteUser(id);
   }
 }

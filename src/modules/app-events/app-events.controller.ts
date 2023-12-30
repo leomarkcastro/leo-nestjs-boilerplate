@@ -37,7 +37,7 @@ export class AppEventsController {
   @Post('calendar/create')
   @WithPermission([PERMISSIONS.EVENTS.CALENDAR.CREATE])
   @Auth()
-  async createCalendar(
+  async calendar_create(
     @CurrentUser() user: IUserJwt,
     @Body() data: CreateCalendarDto,
   ) {
@@ -67,7 +67,7 @@ export class AppEventsController {
   @Post('calendar/update/:id')
   @WithPermission([PERMISSIONS.EVENTS.CALENDAR.UPDATE])
   @Auth()
-  async updateCalendar(
+  async calendar_update(
     @CurrentUser() user: IUserJwt,
     @Param('id') id: string,
     @Body() data: UpdateCalendarDto,
@@ -80,7 +80,7 @@ export class AppEventsController {
   @Post('calendar/add-members/:id')
   @WithPermission([PERMISSIONS.EVENTS.CALENDAR.ADD_MEMBERS])
   @Auth()
-  async addMembersToCalendar(
+  async calendar_addMembers(
     @CurrentUser() user: IUserJwt,
     @Param('id') id: string,
     @Body() data: ManageMembersListRequest,
@@ -93,7 +93,7 @@ export class AppEventsController {
   @Post('calendar/remove-members/:id')
   @WithPermission([PERMISSIONS.EVENTS.CALENDAR.ADD_MEMBERS])
   @Auth()
-  async removeMembersToCalendar(
+  async calendar_removeMembers(
     @CurrentUser() user: IUserJwt,
     @Param('id') id: string,
     @Body() data: ManageMembersListRequest,
@@ -106,7 +106,7 @@ export class AppEventsController {
   @Post('calendar/update-members/:id')
   @WithPermission([PERMISSIONS.EVENTS.CALENDAR.ADD_MEMBERS])
   @Auth()
-  async updateMembersToCalendar(
+  async calendar_updateMembers(
     @CurrentUser() user: IUserJwt,
     @Param('id') id: string,
     @Body() data: ManageMembersListRequest,
@@ -119,7 +119,10 @@ export class AppEventsController {
   @Post('calendar/delete/:id')
   @WithPermission([PERMISSIONS.EVENTS.CALENDAR.DELETE])
   @Auth()
-  async deleteCalendar(@CurrentUser() user: IUserJwt, @Param('id') id: string) {
+  async calendar_delete(
+    @CurrentUser() user: IUserJwt,
+    @Param('id') id: string,
+  ) {
     await this.checkCalendarAdmin(user, id);
     return await this.service.deleteCalendar(id);
   }
@@ -128,7 +131,7 @@ export class AppEventsController {
   @Get('calendar')
   @WithPermission([PERMISSIONS.EVENTS.CALENDAR.GET])
   @Auth()
-  async getCalendars(@CurrentUser() user: IUserJwt) {
+  async calendar_getCalendarList(@CurrentUser() user: IUserJwt) {
     return await this.service.getCalendars(user);
   }
 
@@ -197,7 +200,7 @@ export class AppEventsController {
   @Get()
   @WithPermission([PERMISSIONS.EVENTS.EVENT.GET])
   @Auth()
-  async getEvents(
+  async calendar_getEventsList(
     @CurrentUser() user: IUserJwt,
     @Query() data: QueryCalendarDto,
   ) {
@@ -209,7 +212,7 @@ export class AppEventsController {
   @Post('create')
   @WithPermission([PERMISSIONS.EVENTS.EVENT.CREATE])
   @Auth()
-  async createEvent(
+  async calendar_createEvent(
     @CurrentUser() user: IUserJwt,
     @Body() data: CreateEventDto,
   ) {
@@ -221,7 +224,7 @@ export class AppEventsController {
   @Post('update/:id')
   @WithPermission([PERMISSIONS.EVENTS.EVENT.UPDATE])
   @Auth()
-  async updateEvent(
+  async calendar_updateEvent(
     @CurrentUser() user: IUserJwt,
     @Param('id') id: string,
     @Body() data: UpdateEventDto,
@@ -233,7 +236,10 @@ export class AppEventsController {
   @Post('delete/:id')
   @WithPermission([PERMISSIONS.EVENTS.EVENT.DELETE])
   @Auth()
-  async deleteEvent(@CurrentUser() user: IUserJwt, @Param('id') id: string) {
+  async calendar_deleteEvent(
+    @CurrentUser() user: IUserJwt,
+    @Param('id') id: string,
+  ) {
     await this.checkListMemberByEvent(user, id);
     return await this.service.delete(id);
   }

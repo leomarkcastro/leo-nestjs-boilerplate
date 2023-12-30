@@ -17,7 +17,7 @@ export class AppContactsController {
   @Post('create')
   @WithPermission([PERMISSIONS.CONTACTS.CREATE])
   @Auth()
-  create(
+  contacts_create(
     @Body() createAppContactDto: CreateAppContactDto,
   ): Promise<ViewAppContactDto> {
     return this.service.create(createAppContactDto);
@@ -26,14 +26,16 @@ export class AppContactsController {
   @Get()
   @WithPermission([PERMISSIONS.CONTACTS.GET])
   @Auth()
-  findAll(@Query() pagination: IPagination): Promise<ViewAppContactDto[]> {
+  contacts_findAll(
+    @Query() pagination: IPagination,
+  ): Promise<ViewAppContactDto[]> {
     return this.service.findAll(pagination);
   }
 
   @Post('update/:id')
   @WithPermission([PERMISSIONS.CONTACTS.UPDATE])
   @Auth()
-  update(
+  contacts_update(
     @Param('id') id: string,
     @Body() updateAppContactDto: UpdateAppContactDto,
   ): Promise<ViewAppContactDto> {
@@ -43,7 +45,7 @@ export class AppContactsController {
   @Post('delete/:id')
   @WithPermission([PERMISSIONS.CONTACTS.DELETE])
   @Auth()
-  remove(@Param('id') id: string): Promise<ViewAppContactDto> {
+  contacts_remove(@Param('id') id: string): Promise<ViewAppContactDto> {
     return this.service.remove(id);
   }
 }

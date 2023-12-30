@@ -34,7 +34,7 @@ export class TestController {
 
   @Auth()
   @Get('template')
-  async getTemplate(@CurrentUser() user: IUserJwt) {
+  async test_template(@CurrentUser() user: IUserJwt) {
     await this.onlyDev(user);
     const template = await this.templates.getTemplate('upload.html', {
       uploadUrl:
@@ -45,7 +45,7 @@ export class TestController {
 
   @Auth()
   @Post('upload')
-  async generatePresignedUrls(
+  async test_presigned(
     @CurrentUser() user: IUserJwt,
     @Body() body: PresignedFileUpload_Body,
   ): Promise<PresignedFileUpload_Response[]> {
@@ -56,7 +56,7 @@ export class TestController {
 
   @Auth()
   @Get('file')
-  async getFile(@CurrentUser() user: IUserJwt, @Res() res: any) {
+  async test_file(@CurrentUser() user: IUserJwt, @Res() res: any) {
     await this.onlyDev(user);
     const fileLocation = 'Screenshot-2023-03-20-121624-35d749.png';
     const file = await this.minio.getObject(
@@ -76,7 +76,7 @@ export class TestController {
 
   @Auth()
   @Get('mail-test')
-  async mailTest(@CurrentUser() user: IUserJwt) {
+  async test_mail(@CurrentUser() user: IUserJwt) {
     await this.onlyDev(user);
     await this.mail.sendEmailFromTemplate(
       'leomarkcastro123@gmail.com',
