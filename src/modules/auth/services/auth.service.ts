@@ -7,7 +7,6 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compareSync, hashSync } from 'bcrypt';
 import { IChangePassword } from '../types/ChangePassword.dto';
-import { IResetPasswordJWT } from '../types/ResetPasswordJWT.dto';
 import { IUserJwt } from '../types/UserJWT.dto';
 import { IUserMe, UpdatableUser } from '../types/UserMe.dto';
 
@@ -42,6 +41,7 @@ export class AuthService {
     if (!validate) return null;
 
     return {
+      type: 'auth',
       id: user.id,
       email: user.email,
     };
@@ -78,6 +78,7 @@ export class AuthService {
     });
 
     return {
+      type: 'auth',
       id: user.id,
       email: user.email,
     };
@@ -89,10 +90,10 @@ export class AuthService {
     });
     if (!user) return;
 
-    const resetPassword: IResetPasswordJWT = {
+    const resetPassword: IUserJwt = {
       id: user.id,
       email: user.email,
-      resetPassword: true,
+      type: 'reset-password',
     };
 
     const token = this.jwtService.sign(resetPassword, {
@@ -118,10 +119,10 @@ export class AuthService {
     });
     if (!user) return;
 
-    const resetPassword: IResetPasswordJWT = {
+    const resetPassword: IUserJwt = {
       id: user.id,
       email: user.email,
-      resetPassword: true,
+      type: 'reset-password',
     };
 
     const token = this.jwtService.sign(resetPassword, {
@@ -143,9 +144,9 @@ export class AuthService {
   }
 
   async resetPassword(token: string, newPassword: string) {
-    const decoded = this.jwtService.decode(token) as IResetPasswordJWT;
+    const decoded = this.jwtService.decode(token) as IUserJwt;
     if (!decoded) return;
-    if (!decoded.resetPassword) return;
+    if (decoded.type !== 'reset-password') return;
 
     const hashedPassword = hashSync(newPassword, 10);
     await this.database.user.update({
@@ -334,6 +335,7 @@ export class AuthService {
       throw new HttpException('Code expired', 400);
 
     return {
+      type: 'auth',
       id: decoded.id,
       email: decoded.email,
     };
