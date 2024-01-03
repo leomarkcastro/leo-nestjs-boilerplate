@@ -8,11 +8,9 @@ import { MinioService } from '../minio/minio.service';
 import { PERMISSIONS } from '../permit/permissions.types';
 import { AppFileService } from './app-file.service';
 import {
-  CreateFileObjectDTO,
-  DatabaseFileObject,
-} from './dto/CreateFileObject.dto';
-import { PresignedFileUpload_Body } from './dto/PresignedBody.dto';
-import { PresignedFileUpload_Response } from './dto/PresignedResponse.dto';
+  UploadFileObjectDTO,
+  UploadFileResponse,
+} from './dto/UploadFileObject.dto';
 
 @Controller('file')
 @ApiTags('file')
@@ -22,24 +20,35 @@ export class AppFileController {
     private readonly service: AppFileService,
   ) {}
 
-  @Post('presigned')
-  @WithPermission([PERMISSIONS.FILE.UPLOAD_PRESIGNED])
-  @Auth()
-  async uploads_generatePresignedUrls(
-    @Body() body: PresignedFileUpload_Body,
-  ): Promise<PresignedFileUpload_Response[]> {
-    const urls = await this.minio.generatePresignedUploadUrls(body.fileNames);
-    return urls;
-  }
+  // @Post('presigned')
+  // @WithPermission([PERMISSIONS.FILE.UPLOAD_PRESIGNED])
+  // @Auth()
+  // async uploads_generatePresignedUrls(
+  //   @Body() body: PresignedFileUpload_Body,
+  // ): Promise<PresignedFileUpload_Response[]> {
+  //   const urls = await this.minio.generatePresignedUploadUrls(body.fileNames);
+  //   return urls;
+  // }
 
-  @Post('createobject')
+  // @Post('createobject')
+  // @WithPermission([PERMISSIONS.FILE.UPLOAD_CREATEOBJECT])
+  // @Auth()
+  // async uploads_createObject(
+  //   @CurrentUser() user: IUserJwt,
+  //   @Body() body: CreateFileObjectDTO,
+  // ): Promise<DatabaseFileObject[]> {
+  //   const urls = await this.service.createFileObject(user, body.files);
+  //   return urls;
+  // }
+
+  @Post('upload')
   @WithPermission([PERMISSIONS.FILE.UPLOAD_CREATEOBJECT])
   @Auth()
-  async uploads_createObject(
+  async uploads_uploadObjects(
     @CurrentUser() user: IUserJwt,
-    @Body() body: CreateFileObjectDTO,
-  ): Promise<DatabaseFileObject[]> {
-    const urls = await this.service.createFileObject(user, body.files);
+    @Body() body: UploadFileObjectDTO,
+  ): Promise<UploadFileResponse[]> {
+    const urls = await this.service.uploadFileObjects(user, body.files);
     return urls;
   }
 }
