@@ -18,6 +18,7 @@ import { IChangePassword } from '../auth/types/ChangePassword.dto';
 import { IUserJwt } from '../auth/types/UserJWT.dto';
 import { IUserMe, PartialUpdatableUser } from '../auth/types/UserMe.dto';
 import { PERMISSIONS } from '../permit/permissions.types';
+import { UsedKeysType } from '../used-keys/used-keys-types';
 import { UsedKeysService } from '../used-keys/used-keys.service';
 import { LoginUser_Request } from './dto/LoginRequest.dto';
 import { RegisterUser_Request } from './dto/RegisterRequest.dto';
@@ -102,7 +103,7 @@ export class AppAuthController {
   async auth_resetPassword(@Body() body: ResetPasswordUser_Request) {
     await this.usedKeys.exists(
       {
-        type: 'reset-password',
+        type: UsedKeysType.resetPassword,
         token: body.token,
       },
       {
@@ -112,7 +113,7 @@ export class AppAuthController {
     );
     await this.authService.resetPassword(body.token, body.password);
     await this.usedKeys.add({
-      type: 'reset-password',
+      type: UsedKeysType.resetPassword,
       token: body.token,
     });
     return 'OK';
@@ -137,6 +138,14 @@ export class AppAuthController {
     @Body() update: IChangePassword,
   ) {
     await this.authService.changePassword(user, update);
+    return 'OK';
+  }
+
+  @Post('logout')
+  @Auth()
+  @ApiResponse({ status: 201 })
+  async auth_logout(@CurrentUser() user: IUserJwt) {
+    await this.authService.logout(user);
     return 'OK';
   }
 }

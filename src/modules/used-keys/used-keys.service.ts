@@ -22,6 +22,8 @@ export class UsedKeysService {
         400,
       );
     }
+
+    return exists;
   }
 
   async add(object: IStringDynamicObject, ttl: number = 6 * _1_HOUR) {

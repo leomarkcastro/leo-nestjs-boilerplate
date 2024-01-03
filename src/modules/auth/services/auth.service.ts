@@ -2,6 +2,8 @@ import { CONFIG } from '@/config/env';
 import { AuthResponse } from '@/global/types/AuthResponse.dto';
 import { Roles } from '@/global/types/Roles.dto';
 import { MailBrevoService } from '@/modules/mail-brevo/mail-brevo.service';
+import { UsedKeysType } from '@/modules/used-keys/used-keys-types';
+import { UsedKeysService } from '@/modules/used-keys/used-keys.service';
 import { PrismaService } from '@@/db-prisma/db-prisma.service';
 import { HttpException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -16,6 +18,7 @@ export class AuthService {
     private readonly database: PrismaService,
     private readonly jwtService: JwtService,
     private readonly mail: MailBrevoService,
+    private readonly usedKeys: UsedKeysService,
   ) {}
 
   async validateUserViaPassword(
@@ -339,5 +342,26 @@ export class AuthService {
       id: decoded.id,
       email: decoded.email,
     };
+  }
+
+  async checkLoggedOut(user: IUserJwt): Promise<boolean> {
+    const token = this.jwtService.sign(user);
+    const exists = await this.usedKeys.exists(
+      {
+        type: UsedKeysType.logout,
+        token,
+      },
+      {
+        throwOnExists: false,
+      },
+    );
+    return !!exists;
+  }
+
+  async logout(user: IUserJwt) {
+    await this.usedKeys.add({
+      type: UsedKeysType.logout,
+      token: this.jwtService.sign(user),
+    });
   }
 }
