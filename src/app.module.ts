@@ -18,6 +18,7 @@ import { MailBrevoModule } from './modules/mail-brevo/mail-brevo.module';
 import { MinioModule } from './modules/minio/minio.module';
 import { PermitModule } from './modules/permit/permit.module';
 import { TemplatesModule } from './modules/templates/templates.module';
+import { UsedKeysModule } from './modules/used-keys/used-keys.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { TemplatesModule } from './modules/templates/templates.module';
     AppEnumsModule,
     AppRolesModule,
     AppUsersModule,
+    UsedKeysModule,
   ],
 })
 export class AppModule {}

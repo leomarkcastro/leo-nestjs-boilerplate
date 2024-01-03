@@ -113,7 +113,7 @@ export class AuthService {
     );
   }
 
-  async requestResetPassword(email: string) {
+  async requestResetPassword(email: string, expiry = '1h') {
     const user = await this.database.user.findUnique({
       where: { email },
     });
@@ -126,7 +126,7 @@ export class AuthService {
     };
 
     const token = this.jwtService.sign(resetPassword, {
-      expiresIn: '1h',
+      expiresIn: expiry,
     });
 
     // send email

@@ -265,3 +265,11 @@ model Contact {
   note      String?
   avatar    String?
 }
+
+model UsedKeys {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  key       String
+  type      String?
+}

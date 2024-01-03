@@ -18,6 +18,7 @@ import { IChangePassword } from '../auth/types/ChangePassword.dto';
 import { IUserJwt } from '../auth/types/UserJWT.dto';
 import { IUserMe, PartialUpdatableUser } from '../auth/types/UserMe.dto';
 import { PERMISSIONS } from '../permit/permissions.types';
+import { UsedKeysService } from '../used-keys/used-keys.service';
 import { LoginUser_Request } from './dto/LoginRequest.dto';
 import { RegisterUser_Request } from './dto/RegisterRequest.dto';
 import { ResetPasswordUser_Request } from './dto/ResetPasswordRequest.dto';
@@ -26,7 +27,10 @@ import { StartResetPasswordUser_Request } from './dto/StartResetPasswordRequest.
 @Controller('auth')
 @ApiTags('auth')
 export class AppAuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private usedKeys: UsedKeysService,
+  ) {}
 
   @Post('login')
   @UseGuards(LocalAuthGuard)
@@ -81,11 +85,36 @@ export class AppAuthController {
     return 'OK';
   }
 
+  @Post('request-auth-reset')
+  @ApiResponse({ status: 201 })
+  @WithPermission([PERMISSIONS.AUTH.RESET_PASSWORD])
+  @Auth()
+  async auth_requestAuthedResetPassword(
+    @Body() body: StartResetPasswordUser_Request,
+  ) {
+    await this.authService.requestResetPassword(body.email, '3d');
+    return 'OK';
+  }
+
   @WithPermission([PERMISSIONS.AUTH.RESET_PASSWORD])
   @Post('reset-password')
   @ApiResponse({ status: 201 })
   async auth_resetPassword(@Body() body: ResetPasswordUser_Request) {
+    await this.usedKeys.exists(
+      {
+        type: 'reset-password',
+        token: body.token,
+      },
+      {
+        throwOnExists: true,
+        throwErrorMsg: 'Token is invalid or expired',
+      },
+    );
     await this.authService.resetPassword(body.token, body.password);
+    await this.usedKeys.add({
+      type: 'reset-password',
+      token: body.token,
+    });
     return 'OK';
   }
 
