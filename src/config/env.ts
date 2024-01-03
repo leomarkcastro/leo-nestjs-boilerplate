@@ -26,4 +26,6 @@ export const CONFIG = {
   AWS_S3_REGION: process.env.AWS_S3_REGION || 'asia-southeast-1',
   AWS_S3_BUCKET: process.env.AWS_S3_BUCKET || 'secret',
   AWS_S3_ENDPOINT: process.env.AWS_S3_ENDPOINT || 'false',
+  THROTTLE_TTL: process.env.THROTTLE_TTL || '60000',
+  THROTTLE_LIMIT: process.env.THROTTLE_LIMIT || '100',
 };

@@ -18,10 +18,12 @@ import { MailBrevoModule } from './modules/mail-brevo/mail-brevo.module';
 import { MinioModule } from './modules/minio/minio.module';
 import { PermitModule } from './modules/permit/permit.module';
 import { TemplatesModule } from './modules/templates/templates.module';
+import { Throttler } from './modules/throttler/throttler.module';
 import { UsedKeysModule } from './modules/used-keys/used-keys.module';
 
 @Module({
   imports: [
+    Throttler,
     DbPrismaModule,
     AuthModule,
     NestCacheModule,
