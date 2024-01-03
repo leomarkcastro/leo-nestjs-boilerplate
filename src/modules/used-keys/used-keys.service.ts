@@ -7,6 +7,10 @@ import { CacheService } from '../cache/cache.service';
 export class UsedKeysService {
   constructor(private readonly cache: CacheService) {}
 
+  intoKey(object: IStringDynamicObject) {
+    return this.cache.sortObjectIntoKey(object);
+  }
+
   exists(
     object: IStringDynamicObject,
     params?: {

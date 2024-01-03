@@ -3,6 +3,8 @@ export class IUserJwt {
   id: string;
   email: string;
   metadata?: {
-    expiresIn?: number;
+    resetExpiresIn?: number;
   };
+  iat?: number;
+  exp?: number;
 }

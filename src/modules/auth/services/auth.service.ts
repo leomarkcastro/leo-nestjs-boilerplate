@@ -345,7 +345,11 @@ export class AuthService {
   }
 
   async checkLoggedOut(user: IUserJwt): Promise<boolean> {
-    const token = this.jwtService.sign(user);
+    const token = this.usedKeys.intoKey({
+      id: user.id,
+      iat: String(user.iat ?? 0),
+      exp: String(user.exp ?? 0),
+    });
     const exists = await this.usedKeys.exists(
       {
         type: UsedKeysType.logout,
@@ -355,13 +359,20 @@ export class AuthService {
         throwOnExists: false,
       },
     );
+    console.log(exists);
     return !!exists;
   }
 
   async logout(user: IUserJwt) {
+    const token = this.usedKeys.intoKey({
+      id: user.id,
+      iat: String(user.iat ?? 0),
+      exp: String(user.exp ?? 0),
+    });
+    console.log(user);
     await this.usedKeys.add({
       type: UsedKeysType.logout,
-      token: this.jwtService.sign(user),
+      token: token,
     });
   }
 }
