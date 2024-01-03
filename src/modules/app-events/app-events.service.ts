@@ -12,6 +12,7 @@ import {
 import { CalendarWithUsers } from './dto/CalendarWithUser.dto';
 import { CreateCalendarDto, QueryCalendarDto } from './dto/CreateCalendar.dto';
 import { CreateEventDto, UpdateEventDto } from './dto/CreateEvent.dto';
+import { EventWithTasks } from './dto/EventObject.dto';
 
 @Injectable()
 export class AppEventsService {
@@ -189,7 +190,7 @@ export class AppEventsService {
   }
 
   // get events on a calendar
-  async getEventsOnCalendar(data: QueryCalendarDto): Promise<Event[]> {
+  async getEventsOnCalendar(data: QueryCalendarDto): Promise<EventWithTasks[]> {
     if (!data.start) {
       data.start = new Date().toISOString();
     }
@@ -250,6 +251,11 @@ export class AppEventsService {
       ...query,
       include: {
         Calendar: true,
+        TaskOnEvent: {
+          include: {
+            Task: true,
+          },
+        },
       },
     });
 
@@ -263,7 +269,7 @@ export class AppEventsService {
       };
     });
 
-    return events;
+    return events as EventWithTasks[];
   }
 
   // update details

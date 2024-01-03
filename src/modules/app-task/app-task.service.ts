@@ -22,6 +22,7 @@ import {
   UpdateTaskDto,
 } from './dto/CreateTask.dto';
 import { ListWithTasks } from './dto/ListWithTask.dto';
+import { TaskOnEvent } from './dto/TaskOnEvent.dto';
 
 @Injectable()
 export class AppTaskService {
@@ -235,7 +236,16 @@ export class AppTaskService {
       include: {
         Tasks: {
           include: {
-            FileOnTask: true,
+            FileOnTask: {
+              include: {
+                File: true,
+              },
+            },
+            TaskOnEvent: {
+              include: {
+                Event: true,
+              },
+            },
           },
         },
       },
@@ -298,6 +308,28 @@ export class AppTaskService {
     return await this.db.task.delete({
       where: {
         id: taskId,
+      },
+    });
+  }
+
+  // ===================================== Task on Event Binding
+
+  async bindTaskToEvent(taskOnEvents: TaskOnEvent[]) {
+    return await this.db.taskOnEvent.createMany({
+      data: taskOnEvents.map((taskOnEvent) => ({
+        taskId: taskOnEvent.taskId,
+        eventId: taskOnEvent.eventId,
+      })),
+    });
+  }
+
+  async unbindTaskToEvent(taskOnEvents: TaskOnEvent[]) {
+    return await this.db.taskOnEvent.deleteMany({
+      where: {
+        OR: taskOnEvents.map((taskOnEvent) => ({
+          taskId: taskOnEvent.taskId,
+          eventId: taskOnEvent.eventId,
+        })),
       },
     });
   }

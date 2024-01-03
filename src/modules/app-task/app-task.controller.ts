@@ -20,6 +20,7 @@ import {
   ModifyTaskFileListDto,
   UpdateTaskDto,
 } from './dto/CreateTask.dto';
+import { UpdateTaskOnEventDto } from './dto/TaskOnEvent.dto';
 
 @Controller('task')
 @ApiTags('task')
@@ -332,5 +333,35 @@ export class AppTaskController {
   async task_delete(@CurrentUser() user: IUserJwt, @Param('id') id: string) {
     await this.checkListMemberByTask(user, id);
     return await this.service.delete(id);
+  }
+
+  // ===================================== task event bind
+
+  // bind
+  @Post('bind')
+  @WithPermission([PERMISSIONS.TASK.TASK.UPDATE])
+  @Auth()
+  async task_bind(
+    @CurrentUser() user: IUserJwt,
+    @Body() data: UpdateTaskOnEventDto,
+  ) {
+    for (const task of data.toBind) {
+      await this.checkListMemberByTask(user, task.taskId);
+    }
+    return await this.service.bindTaskToEvent(data.toBind);
+  }
+
+  // unbind
+  @Post('unbind')
+  @WithPermission([PERMISSIONS.TASK.TASK.UPDATE])
+  @Auth()
+  async task_unbind(
+    @CurrentUser() user: IUserJwt,
+    @Body() data: UpdateTaskOnEventDto,
+  ) {
+    for (const task of data.toBind) {
+      await this.checkListMemberByTask(user, task.taskId);
+    }
+    return await this.service.unbindTaskToEvent(data.toBind);
   }
 }
