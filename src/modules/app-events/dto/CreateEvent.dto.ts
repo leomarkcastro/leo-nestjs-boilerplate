@@ -17,15 +17,15 @@ export class CreateEventDto {
 
   @IsOptional()
   @IsDateString()
-  start: string;
+  start?: string;
 
   @IsOptional()
   @IsDateString()
-  end: string;
+  end?: string;
 
   @IsOptional()
   @IsBoolean()
-  allDay: boolean = false;
+  allDay?: boolean = false;
 
   @IsString()
   calendarId: string;
@@ -36,14 +36,14 @@ export class CreateEventDto {
   @Matches(/^#([0-9A-F]{3}){1,2}$/i, {
     message: 'invalid hex format',
   })
-  backgroundColor: string;
+  backgroundColor?: string;
 
   // check if string follows the rgba format
   @IsString()
   @Matches(/^#([0-9A-F]{3}){1,2}$/i, {
     message: 'invalid rgba format',
   })
-  textColor: string;
+  textColor?: string;
 }
 
 export class UpdateEventDto extends PartialType(CreateEventDto) {}
