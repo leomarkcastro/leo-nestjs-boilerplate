@@ -190,7 +190,10 @@ export class AppEventsService {
   }
 
   // get events on a calendar
-  async getEventsOnCalendar(data: QueryCalendarDto): Promise<EventWithTasks[]> {
+  async getEventsOnCalendar(
+    user: IUserJwt,
+    data: QueryCalendarDto,
+  ): Promise<EventWithTasks[]> {
     if (!data.start) {
       data.start = new Date().toISOString();
     }
@@ -244,6 +247,13 @@ export class AppEventsService {
       ...query.where,
       calendarId: {
         in: data.ids ?? ['nul'],
+      },
+      Calendar: {
+        CalendarOnUser: {
+          some: {
+            userId: user.id,
+          },
+        },
       },
     };
 

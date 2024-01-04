@@ -204,10 +204,15 @@ export class AppEventsController {
     @CurrentUser() user: IUserJwt,
     @Query() data: QueryCalendarDto,
   ) {
-    for (const calendarId of data.ids) {
-      await this.checkListMemberByCalendar(user, calendarId, true);
+    // if data.ids is a string, covnert it to array
+    if (typeof data.ids === 'string') {
+      data.ids = [data.ids];
     }
-    return await this.service.getEventsOnCalendar(data);
+    // for (const calendarId of data.ids) {
+    //   await this.checkListMemberByCalendar(user, calendarId, true);
+    // }
+    // this is a hack to make sure that the user has access to at least one calendar
+    return await this.service.getEventsOnCalendar(user, data);
   }
 
   // create
