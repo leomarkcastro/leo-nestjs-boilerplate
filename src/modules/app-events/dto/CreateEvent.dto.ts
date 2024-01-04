@@ -39,6 +39,7 @@ export class CreateEventDto {
   backgroundColor?: string;
 
   // check if string follows the rgba format
+  @IsOptional()
   @IsString()
   @Matches(/^#([0-9A-F]{3}){1,2}$/i, {
     message: 'invalid rgba format',
