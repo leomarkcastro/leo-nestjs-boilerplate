@@ -196,7 +196,7 @@ export class AppEventsController {
     );
   }
 
-  // create
+  // get
   @Get()
   @WithPermission([PERMISSIONS.EVENTS.EVENT.GET])
   @Auth()
@@ -204,7 +204,9 @@ export class AppEventsController {
     @CurrentUser() user: IUserJwt,
     @Query() data: QueryCalendarDto,
   ) {
-    await this.checkListMemberByCalendar(user, data.id, true);
+    for (const calendarId of data.ids) {
+      await this.checkListMemberByCalendar(user, calendarId, true);
+    }
     return await this.service.getEventsOnCalendar(data);
   }
 

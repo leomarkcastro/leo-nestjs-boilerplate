@@ -240,12 +240,12 @@ export class AppEventsService {
       },
     };
 
-    if (data.id) {
-      query.where = {
-        ...query.where,
-        calendarId: data.id,
-      };
-    }
+    query.where = {
+      ...query.where,
+      calendarId: {
+        in: data.ids ?? ['nul'],
+      },
+    };
 
     let events = await this.db.event.findMany({
       ...query,
