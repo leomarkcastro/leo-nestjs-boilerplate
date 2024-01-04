@@ -11,14 +11,14 @@ export class UsedKeysService {
     return this.cache.sortObjectIntoKey(object);
   }
 
-  exists(
+  async exists(
     object: IStringDynamicObject,
     params?: {
       throwOnExists?: boolean;
       throwErrorMsg?: string;
     },
   ) {
-    const exists = this.cache.getTTL(object);
+    const exists = await this.cache.getTTL(object);
 
     if (exists && params?.throwOnExists) {
       throw new HttpException(
