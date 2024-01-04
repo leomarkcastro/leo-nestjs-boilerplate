@@ -1,6 +1,6 @@
 import { Calendar } from '@/global/prisma-classes/calendar';
 import { Event } from '@/global/prisma-classes/event';
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { IUserJwt } from '../auth/types/UserJWT.dto';
 import { PrismaService } from '../db-prisma/db-prisma.service';
@@ -175,6 +175,13 @@ export class AppEventsService {
 
   // create
   async create(createEvent: CreateEventDto): Promise<Event> {
+    // check if allDay is true, else check if start and end is provided
+    if (!createEvent.allDay) {
+      if (!createEvent.start || !createEvent.end) {
+        throw new HttpException('start and end must be provided', 400);
+      }
+    }
+
     return await this.db.event.create({
       data: {
         title: createEvent.title,
