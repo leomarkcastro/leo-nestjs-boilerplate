@@ -104,11 +104,10 @@ export class AuthService {
     });
 
     // send email
-    await this.mail.sendEmailFromTemplate(
+    await this.mail.sendEmailByBrevoTemplate(
       user.email,
       'New Account Setup',
-      'Welcome to BDB Portal. Click the button below to start setting the password for your account.',
-      'new-account.hbs',
+      CONFIG.BREVO_TEMPLATE_NEW_ACCOUNT,
       {
         username: user.email,
         reset_url: `${CONFIG.PAGE_URL}${CONFIG.NEW_ACCOUNT_URL}?token=${token}`,
@@ -133,11 +132,10 @@ export class AuthService {
     });
 
     // send email
-    await this.mail.sendEmailFromTemplate(
+    await this.mail.sendEmailByBrevoTemplate(
       user.email,
       'Reset Password',
-      "Reset Password Request. Ignore this email if you didn't request this.",
-      'reset-password.hbs',
+      CONFIG.BREVO_TEMPLATE_RESET_PASSWORD,
       {
         username: user.email,
         time_date: new Date().toLocaleString(),
@@ -264,12 +262,6 @@ export class AuthService {
     const now = new Date();
     const lastSent = localAuth.twofaEmailLastSent || new Date(0);
     const diff = now.getTime() - lastSent.getTime();
-    console.log(
-      diff,
-      Number(CONFIG.TWOFA_EMAIL_EXPIRY_TIME),
-      now.getTime(),
-      lastSent.getTime(),
-    );
     if (diff > Number(CONFIG.TWOFA_EMAIL_EXPIRY_TIME)) {
       // generate 2fa code
       const code = Math.floor(100000 + Math.random() * 900000);
@@ -359,7 +351,6 @@ export class AuthService {
         throwOnExists: false,
       },
     );
-    console.log(exists);
     return !!exists;
   }
 
@@ -369,7 +360,6 @@ export class AuthService {
       iat: String(user.iat ?? 0),
       exp: String(user.exp ?? 0),
     });
-    console.log(user);
     await this.usedKeys.add({
       type: UsedKeysType.logout,
       token: token,

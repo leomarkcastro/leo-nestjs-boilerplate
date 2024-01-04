@@ -32,7 +32,6 @@ export function paginationObject(
   let query: CorePaginationObject = {};
 
   if (pagination) {
-    console.log('pagination', pagination);
     query = {
       take: pagination.limit,
       skip: (pagination.page - 1) * pagination.limit,

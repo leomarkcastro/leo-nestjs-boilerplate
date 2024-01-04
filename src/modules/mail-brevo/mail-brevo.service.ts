@@ -8,7 +8,12 @@ import { TemplatesService } from '../templates/templates.service';
 export class MailBrevoService {
   constructor(private readonly templateService: TemplatesService) {}
 
-  async _sendEmailRoutine(options: ISendMailOptions) {
+  async _sendEmailRoutine(
+    options: ISendMailOptions,
+    extra?: {
+      templateParams?: SibApiV3Sdk.SendSmtpEmail['params'];
+    },
+  ) {
     const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
     // @ts-expect-error - this just works, if there's a way to properly type this, please let me know
@@ -17,7 +22,11 @@ export class MailBrevoService {
     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
 
     sendSmtpEmail.subject = options.subject;
-    sendSmtpEmail.htmlContent = options.html as string;
+    if (options.template) {
+      sendSmtpEmail.templateId = Number(options.template);
+    } else if (options.html) {
+      sendSmtpEmail.htmlContent = options.html as string;
+    }
     sendSmtpEmail.sender = {
       name: CONFIG.MAILER_NAME,
       email: CONFIG.MAILER_EMAILADDRESS,
@@ -35,11 +44,34 @@ export class MailBrevoService {
     //   parameter: 'My param value',
     //   subject: 'New Subject',
     // };
-
+    if (extra?.templateParams) {
+      sendSmtpEmail.params = extra?.templateParams;
+    }
     return await apiInstance.sendTransacEmail(sendSmtpEmail);
   }
 
-  async sendEmail(
+  async sendEmailByBrevoTemplate(
+    to: string,
+    subject: string,
+    templateId: string,
+    params: SibApiV3Sdk.SendSmtpEmail['params'],
+  ) {
+    const messageId = await this._sendEmailRoutine(
+      {
+        to: to,
+        cc: '',
+        subject: subject,
+        template: templateId,
+      },
+      {
+        templateParams: params,
+      },
+    );
+
+    return messageId;
+  }
+
+  async sendEmailByLocalTemplate(
     to: string,
     subject: string,
     plainTextMessage: string,
@@ -76,7 +108,7 @@ export class MailBrevoService {
     );
 
     // send the email
-    const messageId = await this.sendEmail(
+    const messageId = await this.sendEmailByLocalTemplate(
       to,
       subject,
       plainTextMessage,
