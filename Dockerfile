@@ -1,65 +1,37 @@
-###################
-# BUILD FOR LOCAL DEVELOPMENT
-###################
+# Use the official Node.js 14 image as the base image
+FROM node:18-alpine AS build
 
-FROM node:18-alpine As development
+# Set the working directory inside the container
+WORKDIR /app
 
-# Create app directory
-WORKDIR /usr/src/app
+# Copy the package.json and package-lock.json files to the working directory
+COPY package.json ./
+COPY yarn.lock ./
 
-# Copy application dependency manifests to the container image.
-# A wildcard is used to ensure copying both package.json AND package-lock.json (when available).
-# Copying this first prevents re-running npm install on every code change.
-COPY --chown=node:node package*.json ./
+# Install the dependencies
+RUN yarn install --frozen-lockfile --production=true
 
-# Install app dependencies using the `npm ci` command instead of `npm install`
-RUN yarn install --frozen-lockfile
-
-# Bundle app source
-COPY --chown=node:node . .
-
-# Use the node user from the image (instead of the root user)
-USER node
-
-
-###################
-# BUILD FOR PRODUCTION
-###################
-
-FROM node:18-alpine As build
-
-WORKDIR /usr/src/app
-
-COPY --chown=node:node package*.json ./
-
-# In order to run `npm run build` we need access to the Nest CLI which is a dev dependency. In the previous development stage we ran `npm ci` which installed all dependencies, so we can copy over the node_modules directory from the development image
-COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
-
-COPY --chown=node:node . .
+# Copy the source code to the working directory
+COPY . .
 
 # Run Prisma generate to generate the Prisma client
 RUN yarn prisma generate
 
-# Run the build command which creates the production bundle
+# Build the NestJS application
 RUN yarn build
 
-# Set NODE_ENV environment variable
-ENV NODE_ENV production
+# Use a lightweight Node.js 14 image as the base image for the final image
+FROM node:18-alpine
 
-# Running `npm ci` removes the existing node_modules directory and passing in --only=production ensures that only the production dependencies are installed. This ensures that the node_modules directory is as optimized as possible
-RUN yarn install --frozen-lockfile --production=true && yarn cache clean --force
+# Set the working directory inside the container
+WORKDIR /app
 
-USER node
+# Copy the built application from the previous stage
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/node_modules ./node_modules
 
-###################
-# PRODUCTION
-###################
+# Expose the port on which the NestJS application will run
+EXPOSE 3000
 
-FROM node:18-alpine As production
-
-# Copy the bundled code from the build stage to the production image
-COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node --from=build /usr/src/app/dist ./dist
-
-# Start the server using the production build
-CMD [ "node", "dist/main.js" ]
+# Start the NestJS application
+CMD ["node", "dist/main"]
