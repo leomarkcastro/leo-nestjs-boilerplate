@@ -124,7 +124,7 @@ export class AppEventsController {
 
   // add public
   @Post('calendar/add-public/:id')
-  @WithPermission([PERMISSIONS.EVENTS.CALENDAR.ADD_MEMBERS])
+  @WithPermission([PERMISSIONS.EVENTS.CALENDAR.PUBLIC])
   @Auth()
   async calendar_addPublic(
     @CurrentUser() user: IUserJwt,
@@ -137,7 +137,7 @@ export class AppEventsController {
 
   // remove public
   @Post('calendar/remove-public/:id')
-  @WithPermission([PERMISSIONS.EVENTS.CALENDAR.ADD_MEMBERS])
+  @WithPermission([PERMISSIONS.EVENTS.CALENDAR.PUBLIC])
   @Auth()
   async calendar_removePublic(
     @CurrentUser() user: IUserJwt,
@@ -149,7 +149,7 @@ export class AppEventsController {
 
   // update public
   @Post('calendar/update-public/:id')
-  @WithPermission([PERMISSIONS.EVENTS.CALENDAR.ADD_MEMBERS])
+  @WithPermission([PERMISSIONS.EVENTS.CALENDAR.PUBLIC])
   @Auth()
   async calendar_updatePublic(
     @CurrentUser() user: IUserJwt,
