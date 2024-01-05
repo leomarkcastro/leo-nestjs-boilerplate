@@ -23,6 +23,12 @@ export class ManageMembersRequest {
   userId: string;
 }
 
+export class ManagePublicMembersRequest {
+  @IsString()
+  @ApiProperty({ enum: Object.values(CalendarAccess) })
+  type?: BoardAccessType = CalendarAccess.VIEW;
+}
+
 export class DeleteMembersRequest {
   userId: string;
 }

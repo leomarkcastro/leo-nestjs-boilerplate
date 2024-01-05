@@ -15,6 +15,7 @@ import { AppEventsService } from './app-events.service';
 import {
   CalendarAccess,
   ManageMembersListRequest,
+  ManagePublicMembersRequest,
 } from './dto/CalendarAccess.dto';
 import {
   CreateCalendarDto,
@@ -48,13 +49,19 @@ export class AppEventsController {
     return await this.permit.checkPermit(
       user,
       await (() => {
-        return this.db.calendarOnUser.findUnique({
+        return this.db.calendarOnUser.findFirst({
           where: {
-            calendarId_userId_type: {
-              calendarId: id,
-              userId: user.id,
-              type: CalendarAccess.ADMIN,
-            },
+            OR: [
+              {
+                calendarId: id,
+                userId: user.id,
+                type: CalendarAccess.ADMIN,
+              },
+              {
+                IsPublic: true,
+                type: CalendarAccess.ADMIN,
+              },
+            ],
           },
         });
       })(),
@@ -115,6 +122,44 @@ export class AppEventsController {
     return await this.service.updateMembersOnCalendar(id, data.members);
   }
 
+  // add public
+  @Post('calendar/add-public/:id')
+  @WithPermission([PERMISSIONS.EVENTS.CALENDAR.ADD_MEMBERS])
+  @Auth()
+  async calendar_addPublic(
+    @CurrentUser() user: IUserJwt,
+    @Param('id') id: string,
+    @Body() data: ManagePublicMembersRequest,
+  ) {
+    await this.checkCalendarAdmin(user, id);
+    return await this.service.addPublicAccessToCalendar(id, data);
+  }
+
+  // remove public
+  @Post('calendar/remove-public/:id')
+  @WithPermission([PERMISSIONS.EVENTS.CALENDAR.ADD_MEMBERS])
+  @Auth()
+  async calendar_removePublic(
+    @CurrentUser() user: IUserJwt,
+    @Param('id') id: string,
+  ) {
+    await this.checkCalendarAdmin(user, id);
+    return await this.service.deletePublicAccessFromCalendar(id);
+  }
+
+  // update public
+  @Post('calendar/update-public/:id')
+  @WithPermission([PERMISSIONS.EVENTS.CALENDAR.ADD_MEMBERS])
+  @Auth()
+  async calendar_updatePublic(
+    @CurrentUser() user: IUserJwt,
+    @Param('id') id: string,
+    @Body() data: ManagePublicMembersRequest,
+  ) {
+    await this.checkCalendarAdmin(user, id);
+    return await this.service.updatePublicAccessOnCalendar(id, data);
+  }
+
   // delete
   @Post('calendar/delete/:id')
   @WithPermission([PERMISSIONS.EVENTS.CALENDAR.DELETE])
@@ -125,6 +170,18 @@ export class AppEventsController {
   ) {
     await this.checkCalendarAdmin(user, id);
     return await this.service.deleteCalendar(id);
+  }
+
+  // get detailed
+  @Get('calendar/:id')
+  @WithPermission([PERMISSIONS.EVENTS.CALENDAR.GET])
+  @Auth()
+  async calendar_getCalendar(
+    @CurrentUser() user: IUserJwt,
+    @Param('id') id: string,
+  ) {
+    await this.checkListMemberByCalendar(user, id, true);
+    return await this.service.getCalendarWithUser(id);
   }
 
   // get
@@ -145,12 +202,18 @@ export class AppEventsController {
     return await this.permit.checkPermit(
       user,
       await (async () => {
-        const fetch = await this.db.calendarOnUser.findUnique({
+        const fetch = await this.db.calendarOnUser.findFirst({
           where: {
-            calendarId_userId: {
-              calendarId: calendarId,
-              userId: user.id,
-            },
+            OR: [
+              {
+                calendarId: calendarId,
+                userId: user.id,
+              },
+              {
+                calendarId: calendarId,
+                IsPublic: true,
+              },
+            ],
           },
         });
         if (!fetch) return null;
@@ -177,12 +240,18 @@ export class AppEventsController {
           },
         });
         if (!eventObj) return null;
-        const fetch = await this.db.calendarOnUser.findUnique({
+        const fetch = await this.db.calendarOnUser.findFirst({
           where: {
-            calendarId_userId: {
-              calendarId: eventObj.Calendar.id,
-              userId: user.id,
-            },
+            OR: [
+              {
+                calendarId: eventObj.Calendar.id,
+                userId: user.id,
+              },
+              {
+                calendarId: eventObj.Calendar.id,
+                IsPublic: true,
+              },
+            ],
           },
         });
         if (!fetch) return null;
@@ -239,6 +308,7 @@ export class AppEventsController {
     await this.checkListMemberByEvent(user, id);
     return await this.service.updateDetails(id, data);
   }
+
   // delete
   @Post('delete/:id')
   @WithPermission([PERMISSIONS.EVENTS.EVENT.DELETE])

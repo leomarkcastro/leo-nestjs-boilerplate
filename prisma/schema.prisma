@@ -214,11 +214,13 @@ model CalendarOnUser {
   type       String?
   Calendar   Calendar @relation(fields: [calendarId], references: [id], onDelete: Cascade)
   calendarId String
-  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String
+  User       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String?
+  IsPublic   Boolean? @default(false)
 
   @@unique([calendarId, userId])
   @@unique([calendarId, userId, type])
+  @@unique([calendarId, type, IsPublic])
 }
 
 model Event {

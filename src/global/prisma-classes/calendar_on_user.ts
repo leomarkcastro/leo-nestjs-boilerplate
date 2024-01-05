@@ -18,4 +18,7 @@ export class CalendarOnUser {
 
   @ApiProperty({ type: String })
   userId: string;
+
+  @ApiPropertyOptional({ type: Boolean })
+  IsPublic?: boolean;
 }

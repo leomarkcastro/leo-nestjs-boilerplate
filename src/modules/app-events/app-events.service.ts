@@ -8,6 +8,7 @@ import {
   CalendarAccess,
   DeleteMembersRequest,
   ManageMembersRequest,
+  ManagePublicMembersRequest,
 } from './dto/CalendarAccess.dto';
 import { CalendarWithUsers } from './dto/CalendarWithUser.dto';
 import { CreateCalendarDto, QueryCalendarDto } from './dto/CreateCalendar.dto';
@@ -149,6 +150,85 @@ export class AppEventsService {
     });
   }
 
+  // add public access
+  async addPublicAccessToCalendar(
+    id: string,
+    data: ManagePublicMembersRequest,
+  ): Promise<CalendarWithUsers> {
+    await this.db.calendarOnUser.create({
+      data: {
+        type: data.type ?? CalendarAccess.VIEW,
+        IsPublic: true,
+        calendarId: id,
+      },
+    });
+
+    return await this.db.calendar.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        CalendarOnUser: {
+          include: {
+            User: true,
+          },
+        },
+      },
+    });
+  }
+
+  // update public access
+  async updatePublicAccessOnCalendar(
+    id: string,
+    data: ManagePublicMembersRequest,
+  ): Promise<CalendarWithUsers> {
+    await this.db.calendarOnUser.updateMany({
+      where: {
+        calendarId: id,
+        IsPublic: true,
+      },
+      data: {
+        type: data.type,
+      },
+    });
+
+    return await this.db.calendar.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        CalendarOnUser: {
+          include: {
+            User: true,
+          },
+        },
+      },
+    });
+  }
+
+  // delete public access
+  async deletePublicAccessFromCalendar(id: string): Promise<CalendarWithUsers> {
+    await this.db.calendarOnUser.deleteMany({
+      where: {
+        calendarId: id,
+        IsPublic: true,
+      },
+    });
+
+    return await this.db.calendar.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        CalendarOnUser: {
+          include: {
+            User: true,
+          },
+        },
+      },
+    });
+  }
+
   // delete
   async deleteCalendar(id: string): Promise<Calendar> {
     return await this.db.calendar.delete({
@@ -164,7 +244,30 @@ export class AppEventsService {
       where: {
         CalendarOnUser: {
           some: {
-            userId: user.id,
+            OR: [
+              {
+                userId: user.id,
+              },
+              {
+                IsPublic: true,
+              },
+            ],
+          },
+        },
+      },
+    });
+  }
+
+  // get with users
+  async getCalendarWithUser(id: string): Promise<CalendarWithUsers> {
+    return await this.db.calendar.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        CalendarOnUser: {
+          include: {
+            User: true,
           },
         },
       },
@@ -258,7 +361,14 @@ export class AppEventsService {
       Calendar: {
         CalendarOnUser: {
           some: {
-            userId: user.id,
+            OR: [
+              {
+                userId: user.id,
+              },
+              {
+                IsPublic: true,
+              },
+            ],
           },
         },
       },
