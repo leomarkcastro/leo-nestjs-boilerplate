@@ -53,5 +53,5 @@ export class QueryCalendarDto {
 
   @IsOptional()
   @IsBoolean()
-  hasStatusFilter?: boolean = true;
+  hasStatusFilter?: boolean = false;
 }

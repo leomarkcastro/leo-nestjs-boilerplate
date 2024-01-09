@@ -1,0 +1,22 @@
+name: Call Caprover Build
+on: push
+jobs:
+  deploydev:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Webhook
+        uses: distributhor/workflow-webhook@v3
+        env:
+          webhook_url: 'https://captain.rvo01.xyzapps.xyz/api/v2/user/apps/webhooks/triggerbuild?namespace=captain&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InRva2VuVmVyc2lvbiI6IjVhMzlmOTEwLWNlN2UtNDJjYS05NzJhLWRiNjc5NTU2ODFiNyIsImFwcE5hbWUiOiJiZGItbmVzdCIsIm5hbWVzcGFjZSI6ImNhcHRhaW4ifSwiaWF0IjoxNzA0NzgwNTMxfQ.3v8Tym4wSH-_NPNaaL-O6cs2AN1a-FXOnSAd_St3Y5g'
+
+  deployprod:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/release'
+    steps:
+      - name: Webhook
+        uses: distributhor/workflow-webhook@v3
+        env:
+          webhook_url: 'https://captain.rvo01.xyzapps.xyz/api/v2/user/apps/webhooks/triggerbuild?namespace=captain&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InRva2VuVmVyc2lvbiI6IjViNzZjNmZjLTJkYzEtNDBiMC04MDEzLWQ1MzFmNDQ1OWZiNyIsImFwcE5hbWUiOiJiZGItbmVzdC1wcm9kIiwibmFtZXNwYWNlIjoiY2FwdGFpbiJ9LCJpYXQiOjE3MDQ3Nzg4ODF9.CXGHs5zl4E3vo7WKpitK6_uf0L35c7euVj6K4W6EmRc'
