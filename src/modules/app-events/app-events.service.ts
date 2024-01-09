@@ -508,4 +508,20 @@ export class AppEventsService {
       },
     });
   }
+
+  // sort status board
+  async sortStatusBoards(statusBoardIds: string[]): Promise<StatusBoard[]> {
+    const promises = statusBoardIds.map((statusBoardId, index) => {
+      return this.db.statusBoard.update({
+        where: {
+          id: statusBoardId,
+        },
+        data: {
+          index,
+        },
+      });
+    });
+
+    return await Promise.all(promises);
+  }
 }

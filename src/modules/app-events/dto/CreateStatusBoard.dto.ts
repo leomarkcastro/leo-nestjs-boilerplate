@@ -19,3 +19,10 @@ export class CreateStatusBoardDto {
 }
 
 export class UpdateStatusBoardDto extends PartialType(CreateStatusBoardDto) {}
+
+export class UpdateStatusBoardSort {
+  @IsString({
+    each: true,
+  })
+  ids: string[];
+}

@@ -22,10 +22,15 @@ import {
   QueryCalendarDto,
   UpdateCalendarDto,
 } from './dto/CreateCalendar.dto';
-import { CreateEventDto, UpdateEventDto } from './dto/CreateEvent.dto';
+import {
+  CreateEventDto,
+  UpdateEventDto,
+  UpdateEventsDto,
+} from './dto/CreateEvent.dto';
 import {
   CreateStatusBoardDto,
   UpdateStatusBoardDto,
+  UpdateStatusBoardSort,
 } from './dto/CreateStatusBoard.dto';
 
 @Controller('events')
@@ -313,6 +318,20 @@ export class AppEventsController {
     return await this.service.updateDetails(id, data);
   }
 
+  // update details
+  @Post('updates')
+  @WithPermission([PERMISSIONS.EVENTS.EVENT.UPDATE])
+  @Auth()
+  async calendar_updateEventBatch(
+    @CurrentUser() user: IUserJwt,
+    @Body() data: UpdateEventsDto,
+  ) {
+    for (const event of data.events) {
+      await this.checkListMemberByEvent(user, event.id);
+    }
+    return await this.service.updateDetailsBatch(data);
+  }
+
   // delete
   @Post('delete/:id')
   @WithPermission([PERMISSIONS.EVENTS.EVENT.DELETE])
@@ -360,5 +379,13 @@ export class AppEventsController {
   @Auth()
   async statusboard_delete(@Param('id') id: string) {
     return await this.service.deleteStatusBoard(id);
+  }
+
+  // sort
+  @Post('statusboard/sort')
+  @WithPermission([PERMISSIONS.EVENTS.STATUSBOARD.UPDATE])
+  @Auth()
+  async statusboard_sort(@Body() data: UpdateStatusBoardSort) {
+    return await this.service.sortStatusBoards(data.ids);
   }
 }
