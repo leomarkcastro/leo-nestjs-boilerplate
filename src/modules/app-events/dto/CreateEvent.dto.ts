@@ -1,7 +1,8 @@
-import { PartialType } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsDateString,
+  IsNumber,
   IsOptional,
   IsString,
   Matches,
@@ -30,6 +31,14 @@ export class CreateEventDto {
   @IsString()
   calendarId: string;
 
+  @IsOptional()
+  @IsString()
+  statusBoardId?: string;
+
+  @IsOptional()
+  @IsNumber()
+  statusBoardIndex?: number;
+
   // check if string follows the rgba format (#RRGGBBAA)
   @IsOptional()
   @IsString()
@@ -48,3 +57,16 @@ export class CreateEventDto {
 }
 
 export class UpdateEventDto extends PartialType(CreateEventDto) {}
+
+export class UpdateEventsCell {
+  @ApiProperty({ type: String })
+  id: string;
+
+  @ApiProperty({ type: () => UpdateEventDto })
+  data: UpdateEventDto;
+}
+
+export class UpdateEventsDto {
+  @ApiProperty({ isArray: true, type: () => UpdateEventsCell })
+  events: UpdateEventsCell[];
+}

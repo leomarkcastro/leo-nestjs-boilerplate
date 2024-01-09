@@ -33,4 +33,10 @@ export class Event {
 
   @ApiProperty({ type: String })
   calendarId: string;
+
+  @ApiPropertyOptional({ type: String })
+  statusBoardId?: string;
+
+  @ApiPropertyOptional({ type: Number })
+  statusBoardIndex?: number;
 }

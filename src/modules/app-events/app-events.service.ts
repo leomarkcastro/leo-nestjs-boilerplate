@@ -12,8 +12,16 @@ import {
 } from './dto/CalendarAccess.dto';
 import { CalendarWithUsers } from './dto/CalendarWithUser.dto';
 import { CreateCalendarDto, QueryCalendarDto } from './dto/CreateCalendar.dto';
-import { CreateEventDto, UpdateEventDto } from './dto/CreateEvent.dto';
-import { EventWithTasks } from './dto/EventObject.dto';
+import {
+  CreateEventDto,
+  UpdateEventDto,
+  UpdateEventsDto,
+} from './dto/CreateEvent.dto';
+import {
+  CreateStatusBoardDto,
+  UpdateStatusBoardDto,
+} from './dto/CreateStatusBoard.dto';
+import { EventWithTasksAndStatus } from './dto/EventObject.dto';
 
 @Injectable()
 export class AppEventsService {
@@ -285,6 +293,18 @@ export class AppEventsService {
       }
     }
 
+    let statusBoardIndex = createEvent.statusBoardIndex;
+
+    if (createEvent.statusBoardId && !statusBoardIndex) {
+      const statusBoardCount = await this.db.event.count({
+        where: {
+          statusBoardId: createEvent.statusBoardId,
+        },
+      });
+
+      statusBoardIndex = statusBoardCount;
+    }
+
     return await this.db.event.create({
       data: {
         title: createEvent.title,
@@ -295,6 +315,8 @@ export class AppEventsService {
         end: createEvent.end,
         backgroundColor: createEvent.backgroundColor,
         textColor: createEvent.textColor,
+        statusBoardId: createEvent.statusBoardId,
+        statusBoardIndex: createEvent.statusBoardIndex,
       },
     });
   }
@@ -303,7 +325,7 @@ export class AppEventsService {
   async getEventsOnCalendar(
     user: IUserJwt,
     data: QueryCalendarDto,
-  ): Promise<EventWithTasks[]> {
+  ): Promise<EventWithTasksAndStatus[]> {
     if (!data.start) {
       data.start = new Date().toISOString();
     }
@@ -383,6 +405,7 @@ export class AppEventsService {
             Task: true,
           },
         },
+        StatusBoard: true,
       },
     });
 
@@ -396,7 +419,7 @@ export class AppEventsService {
       };
     });
 
-    return events as EventWithTasks[];
+    return events as EventWithTasksAndStatus[];
   }
 
   // update details
@@ -404,11 +427,26 @@ export class AppEventsService {
     id: string,
     data: Partial<UpdateEventDto>,
   ): Promise<Event> {
+    let statusBoardIndex;
+
+    if (data.statusBoardId && !statusBoardIndex) {
+      const statusBoardCount = await this.db.event.count({
+        where: {
+          statusBoardId: data.statusBoardId,
+        },
+      });
+
+      statusBoardIndex = statusBoardCount;
+    }
+
     return await this.db.event.update({
       where: {
         id,
       },
-      data,
+      data: {
+        ...data,
+        statusBoardIndex,
+      },
     });
   }
 
@@ -417,6 +455,52 @@ export class AppEventsService {
     return await this.db.event.delete({
       where: {
         id: eventId,
+      },
+    });
+  }
+
+  // update batch
+  async updateDetailsBatch(events: UpdateEventsDto): Promise<Event[]> {
+    const promises = events.events.map((event) => {
+      return this.db.event.update({
+        where: {
+          id: event.id,
+        },
+        data: event.data,
+      });
+    });
+
+    return await Promise.all(promises);
+  }
+
+  // ===================================== status board
+  // get
+  async getStatusBoards() {
+    return await this.db.statusBoard.findMany();
+  }
+
+  // create
+  async createStatusBoard(data: CreateStatusBoardDto) {
+    return await this.db.statusBoard.create({
+      data,
+    });
+  }
+
+  // update
+  async updateStatusBoard(id: string, data: Partial<UpdateStatusBoardDto>) {
+    return await this.db.statusBoard.update({
+      where: {
+        id,
+      },
+      data,
+    });
+  }
+
+  // delete
+  async deleteStatusBoard(id: string) {
+    return await this.db.statusBoard.delete({
+      where: {
+        id,
       },
     });
   }

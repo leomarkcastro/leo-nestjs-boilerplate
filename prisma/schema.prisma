@@ -224,19 +224,22 @@ model CalendarOnUser {
 }
 
 model Event {
-  id              String        @id @default(cuid())
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  title           String
-  description     String?
-  backgroundColor String?
-  textColor       String?
-  start           DateTime?
-  end             DateTime?
-  allDay          Boolean
-  Calendar        Calendar      @relation(fields: [calendarId], references: [id], onDelete: Cascade)
-  calendarId      String
-  TaskOnEvent     TaskOnEvent[]
+  id               String        @id @default(cuid())
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  title            String
+  description      String?
+  backgroundColor  String?
+  textColor        String?
+  start            DateTime?
+  end              DateTime?
+  allDay           Boolean
+  Calendar         Calendar      @relation(fields: [calendarId], references: [id], onDelete: Cascade)
+  calendarId       String
+  TaskOnEvent      TaskOnEvent[]
+  StatusBoard      StatusBoard?  @relation(fields: [statusBoardId], references: [id], onDelete: SetNull)
+  statusBoardId    String?
+  statusBoardIndex Int?
 }
 
 model TaskOnEvent {
@@ -290,4 +293,14 @@ model UsedKeys {
   updatedAt DateTime @updatedAt
   key       String
   type      String?
+}
+
+model StatusBoard {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  color     String
+  index     Int
+  Event     Event[]
 }

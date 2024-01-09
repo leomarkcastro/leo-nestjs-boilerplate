@@ -23,6 +23,10 @@ import {
   UpdateCalendarDto,
 } from './dto/CreateCalendar.dto';
 import { CreateEventDto, UpdateEventDto } from './dto/CreateEvent.dto';
+import {
+  CreateStatusBoardDto,
+  UpdateStatusBoardDto,
+} from './dto/CreateStatusBoard.dto';
 
 @Controller('events')
 @ApiTags('events')
@@ -319,5 +323,42 @@ export class AppEventsController {
   ) {
     await this.checkListMemberByEvent(user, id);
     return await this.service.delete(id);
+  }
+
+  // ===================================== status board
+
+  // get list
+  @Get('statusboard')
+  @WithPermission([PERMISSIONS.EVENTS.STATUSBOARD.GET])
+  @Auth()
+  async statusboard_getList() {
+    return await this.service.getStatusBoards();
+  }
+
+  // create
+  @Post('statusboard/create')
+  @WithPermission([PERMISSIONS.EVENTS.STATUSBOARD.CREATE])
+  @Auth()
+  async statusboard_create(@Body() data: CreateStatusBoardDto) {
+    return await this.service.createStatusBoard(data);
+  }
+
+  // update details
+  @Post('statusboard/update/:id')
+  @WithPermission([PERMISSIONS.EVENTS.STATUSBOARD.UPDATE])
+  @Auth()
+  async statusboard_update(
+    @Param('id') id: string,
+    @Body() data: UpdateStatusBoardDto,
+  ) {
+    return await this.service.updateStatusBoard(id, data);
+  }
+
+  // delete
+  @Post('statusboard/delete/:id')
+  @WithPermission([PERMISSIONS.EVENTS.STATUSBOARD.DELETE])
+  @Auth()
+  async statusboard_delete(@Param('id') id: string) {
+    return await this.service.deleteStatusBoard(id);
   }
 }
