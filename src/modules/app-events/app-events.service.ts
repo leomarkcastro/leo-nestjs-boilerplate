@@ -1,5 +1,6 @@
 import { Calendar } from '@/global/prisma-classes/calendar';
 import { Event } from '@/global/prisma-classes/event';
+import { StatusBoard } from '@/global/prisma-classes/status_board';
 import { HttpException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { IUserJwt } from '../auth/types/UserJWT.dto';
@@ -475,19 +476,22 @@ export class AppEventsService {
 
   // ===================================== status board
   // get
-  async getStatusBoards() {
+  async getStatusBoards(): Promise<StatusBoard[]> {
     return await this.db.statusBoard.findMany();
   }
 
   // create
-  async createStatusBoard(data: CreateStatusBoardDto) {
+  async createStatusBoard(data: CreateStatusBoardDto): Promise<StatusBoard> {
     return await this.db.statusBoard.create({
       data,
     });
   }
 
   // update
-  async updateStatusBoard(id: string, data: Partial<UpdateStatusBoardDto>) {
+  async updateStatusBoard(
+    id: string,
+    data: Partial<UpdateStatusBoardDto>,
+  ): Promise<StatusBoard> {
     return await this.db.statusBoard.update({
       where: {
         id,
@@ -497,7 +501,7 @@ export class AppEventsService {
   }
 
   // delete
-  async deleteStatusBoard(id: string) {
+  async deleteStatusBoard(id: string): Promise<StatusBoard> {
     return await this.db.statusBoard.delete({
       where: {
         id,
