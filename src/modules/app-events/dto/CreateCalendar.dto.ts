@@ -1,5 +1,11 @@
 import { PartialType } from '@nestjs/swagger';
-import { IsDateString, IsOptional, IsString, Matches } from 'class-validator';
+import {
+  IsBoolean,
+  IsDateString,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 
 export class CreateCalendarDto {
   @IsString()
@@ -8,6 +14,10 @@ export class CreateCalendarDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  hasStatus?: boolean;
 
   // check if string follows the rgba format
   @IsString()
@@ -40,4 +50,8 @@ export class QueryCalendarDto {
   @IsOptional()
   @IsDateString()
   end?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  hasStatusFilter?: boolean = true;
 }

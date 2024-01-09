@@ -12,7 +12,11 @@ import {
   ManagePublicMembersRequest,
 } from './dto/CalendarAccess.dto';
 import { CalendarWithUsers } from './dto/CalendarWithUser.dto';
-import { CreateCalendarDto, QueryCalendarDto } from './dto/CreateCalendar.dto';
+import {
+  CreateCalendarDto,
+  QueryCalendarDto,
+  UpdateCalendarDto,
+} from './dto/CreateCalendar.dto';
 import {
   CreateEventDto,
   UpdateEventDto,
@@ -54,7 +58,7 @@ export class AppEventsService {
   // update
   async updateCalendar(
     id: string,
-    data: Partial<CreateCalendarDto>,
+    data: Partial<UpdateCalendarDto>,
   ): Promise<Calendar> {
     return await this.db.calendar.update({
       where: {
@@ -376,6 +380,8 @@ export class AppEventsService {
       },
     };
 
+    const filterOnlyHasStatus = data.hasStatusFilter ?? false;
+
     query.where = {
       ...query.where,
       calendarId: {
@@ -396,6 +402,10 @@ export class AppEventsService {
         },
       },
     };
+
+    if (filterOnlyHasStatus) {
+      query.where.Calendar.hasStatus = true;
+    }
 
     let events = await this.db.event.findMany({
       ...query,

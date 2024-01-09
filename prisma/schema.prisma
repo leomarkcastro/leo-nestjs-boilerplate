@@ -203,6 +203,7 @@ model Calendar {
   description     String?
   backgroundColor String
   textColor       String
+  hasStatus       Boolean          @default(false)
   CalendarOnUser  CalendarOnUser[]
   Event           Event[]
 }

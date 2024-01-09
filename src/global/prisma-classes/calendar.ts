@@ -16,6 +16,9 @@ export class Calendar {
   @ApiPropertyOptional({ type: String })
   description?: string;
 
+  @ApiProperty({ type: Boolean })
+  hasStatus: boolean;
+
   @ApiProperty({ type: String })
   backgroundColor: string;
 
