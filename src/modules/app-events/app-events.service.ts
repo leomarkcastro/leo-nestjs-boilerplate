@@ -341,8 +341,10 @@ export class AppEventsService {
       data.end = date.toISOString();
     }
 
-    const query: Prisma.EventFindManyArgs = {
-      where: {
+    const query: Prisma.EventFindManyArgs = {};
+
+    if (!data.captureAll) {
+      query.where = {
         OR: [
           // (loadingTime <= dateRange.start && endTime > dateRange.start) ||
           {
@@ -377,16 +379,13 @@ export class AppEventsService {
             },
           },
         ],
-      },
-    };
+      };
+    }
 
     const filterOnlyHasStatus = data.hasStatusFilter ?? false;
 
     query.where = {
       ...query.where,
-      calendarId: {
-        in: data.ids ?? ['nul'],
-      },
       Calendar: {
         CalendarOnUser: {
           some: {
@@ -402,6 +401,15 @@ export class AppEventsService {
         },
       },
     };
+
+    if (data.ids && data.ids.length > 0) {
+      query.where = {
+        ...query.where,
+        calendarId: {
+          in: data.ids,
+        },
+      };
+    }
 
     if (filterOnlyHasStatus) {
       query.where.Calendar.hasStatus = true;

@@ -41,7 +41,7 @@ export class QueryCalendarDto {
   @IsString({
     each: true,
   })
-  ids: string[];
+  ids?: string[] = [];
 
   @IsOptional()
   @IsDateString()
@@ -50,6 +50,10 @@ export class QueryCalendarDto {
   @IsOptional()
   @IsDateString()
   end?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  captureAll?: boolean = false;
 
   @IsOptional()
   @IsBoolean()
