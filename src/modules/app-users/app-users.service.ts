@@ -95,7 +95,10 @@ export class AppUsersService {
     pagination: IPagination,
   ): Promise<IPaginationResponse<UserWithRelations>> {
     const query: Prisma.UserFindManyArgs = {
-      ...paginationObject(pagination, basicSearch(pagination, ['name'])),
+      ...paginationObject(
+        pagination,
+        basicSearch(pagination, ['firstName', 'lastName', 'email', 'name']),
+      ),
     };
 
     const data = await this.database.user.findMany({
