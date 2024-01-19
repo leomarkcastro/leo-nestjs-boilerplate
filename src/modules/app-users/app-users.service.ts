@@ -109,7 +109,7 @@ export class AppUsersService {
         Role: true,
       },
     });
-    const total = await this.database.user.count();
+    const total = await this.database.user.count(query as Prisma.UserCountArgs);
 
     return {
       data,
