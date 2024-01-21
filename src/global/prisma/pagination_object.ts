@@ -11,18 +11,21 @@ export interface CorePaginationObject {
 
 export function basicSearch(pagination: IPagination, keysToSearch: string[]) {
   if (pagination?.search && pagination.search.length > 0) {
-    return () => ({
-      where: {
-        OR: keysToSearch.map((key) => ({
-          [key]: {
-            contains: pagination.search,
-            mode: 'insensitive',
-          },
-        })),
-      },
-    });
+    return (queryObject: any) => {
+      return {
+        ...(queryObject ?? {}),
+        where: {
+          OR: keysToSearch.map((key) => ({
+            [key]: {
+              contains: pagination.search,
+              mode: 'insensitive',
+            },
+          })),
+        },
+      };
+    };
   }
-  return () => {};
+  return (queryObject: any) => queryObject;
 }
 
 export function paginationObject(
