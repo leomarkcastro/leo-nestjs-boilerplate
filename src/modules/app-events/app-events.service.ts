@@ -266,6 +266,9 @@ export class AppEventsService {
           },
         },
       },
+      orderBy: {
+        title: 'asc',
+      },
     });
   }
 
