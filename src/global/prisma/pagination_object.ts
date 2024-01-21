@@ -39,7 +39,7 @@ export function paginationObject(
       take: pagination.limit,
       skip: (pagination.page - 1) * pagination.limit,
       orderBy: {
-        [pagination.sortBy]: pagination.sortDesc ? 'desc' : 'asc',
+        [pagination.sortBy]: pagination.sortDesc === 'true' ? 'desc' : 'asc',
       },
     };
   }

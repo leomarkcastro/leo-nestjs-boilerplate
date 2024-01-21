@@ -1,11 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsBoolean,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class IPagination {
   @IsOptional()
@@ -21,8 +15,8 @@ export class IPagination {
   @IsString()
   sortBy?: string = 'createdAt';
 
-  @IsBoolean()
-  sortDesc?: boolean = true;
+  @IsString()
+  sortDesc?: string = 'true';
 }
 
 export class IPaginationResponse<T> {
