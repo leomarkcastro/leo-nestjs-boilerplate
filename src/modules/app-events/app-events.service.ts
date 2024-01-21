@@ -434,8 +434,13 @@ export class AppEventsService {
       return {
         ...event,
         backgroundColor:
-          event.backgroundColor ?? event.Calendar.backgroundColor,
-        textColor: event.textColor ?? event.Calendar.textColor,
+          event.backgroundColor ??
+          event.StatusBoard?.bgColor ??
+          event.Calendar.backgroundColor,
+        textColor:
+          event.textColor ??
+          event.StatusBoard?.color ??
+          event.Calendar.textColor,
       };
     });
 

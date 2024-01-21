@@ -281,6 +281,7 @@ model StatusBoard {
   updatedAt DateTime @updatedAt
   name      String
   color     String
+  bgColor   String?
   index     Int
   Event     Event[]
 }

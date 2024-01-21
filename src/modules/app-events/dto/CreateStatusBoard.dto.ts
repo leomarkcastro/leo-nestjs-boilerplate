@@ -13,6 +13,14 @@ export class CreateStatusBoardDto {
   })
   color = '#ffffff';
 
+  // check if string follows the rgba format (#RRGGBBAA)
+  @IsOptional()
+  @IsString()
+  @Matches(/^#([0-9A-F]{3}){1,2}$/i, {
+    message: 'invalid hex format',
+  })
+  bgColor = '#000000';
+
   @IsOptional()
   @IsNumber()
   index = -1;
