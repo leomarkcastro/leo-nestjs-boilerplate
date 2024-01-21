@@ -79,8 +79,6 @@ model PermissionOnRole {
   roleId       String
   Permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
   permissionId String
-
-  @@unique([roleId, permissionId])
 }
 
 model File {
@@ -104,9 +102,6 @@ model FileOnUser {
   fileId    String
   User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-
-  @@unique([fileId, userId])
-  @@unique([fileId, userId, type])
 }
 
 model Notification {
@@ -129,9 +124,6 @@ model NotificationOnUser {
   notificationId String
   User           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
-
-  @@unique([notificationId, userId])
-  @@unique([notificationId, userId, type])
 }
 
 model Board {
@@ -152,9 +144,6 @@ model UserOnBoard {
   userId    String
   Board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
   boardId   String
-
-  @@unique([userId, boardId])
-  @@unique([userId, boardId, type])
 }
 
 model List {
@@ -190,9 +179,6 @@ model FileOnTask {
   fileId    String
   Task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   taskId    String
-
-  @@unique([fileId, taskId])
-  @@unique([fileId, taskId, type])
 }
 
 model Calendar {
@@ -218,10 +204,6 @@ model CalendarOnUser {
   User       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String?
   IsPublic   Boolean? @default(false)
-
-  @@unique([calendarId, userId])
-  @@unique([calendarId, userId, type])
-  @@unique([calendarId, type, IsPublic])
 }
 
 model Event {
@@ -252,9 +234,6 @@ model TaskOnEvent {
   taskId    String
   Event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId   String
-
-  @@unique([taskId, eventId])
-  @@unique([taskId, eventId, type])
 }
 
 model Department {

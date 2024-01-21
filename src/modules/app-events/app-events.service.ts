@@ -102,12 +102,10 @@ export class AppEventsService {
     data: ManageMembersRequest[],
   ): Promise<CalendarWithUsers> {
     for (const member of data) {
-      await this.db.calendarOnUser.update({
+      await this.db.calendarOnUser.updateMany({
         where: {
-          calendarId_userId: {
-            calendarId: id,
-            userId: member.userId,
-          },
+          calendarId: id,
+          userId: member.userId,
         },
         data: {
           type: member.type,

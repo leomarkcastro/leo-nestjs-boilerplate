@@ -47,13 +47,11 @@ export class AppTaskController {
     return await this.permit.checkPermit(
       user,
       await (() => {
-        return this.db.userOnBoard.findUnique({
+        return this.db.userOnBoard.findFirst({
           where: {
-            userId_boardId_type: {
-              boardId: id,
-              userId: user.id,
-              type: BoardAccess.ADMIN,
-            },
+            boardId: id,
+            userId: user.id,
+            type: BoardAccess.ADMIN,
           },
         });
       })(),
@@ -144,12 +142,10 @@ export class AppTaskController {
     return await this.permit.checkPermit(
       user,
       await (async () => {
-        const fetch = await this.db.userOnBoard.findUnique({
+        const fetch = await this.db.userOnBoard.findFirst({
           where: {
-            userId_boardId: {
-              boardId: boardId,
-              userId: user.id,
-            },
+            boardId: boardId,
+            userId: user.id,
           },
         });
         if (!fetch) return null;
@@ -173,12 +169,10 @@ export class AppTaskController {
           },
         });
         if (!taskObj) return null;
-        const fetch = await this.db.userOnBoard.findUnique({
+        const fetch = await this.db.userOnBoard.findFirst({
           where: {
-            userId_boardId: {
-              boardId: taskObj.boardId,
-              userId: user.id,
-            },
+            boardId: taskObj.boardId,
+            userId: user.id,
           },
         });
         if (!fetch) return null;
@@ -205,12 +199,10 @@ export class AppTaskController {
           },
         });
         if (!taskObj) return null;
-        const fetch = await this.db.userOnBoard.findUnique({
+        const fetch = await this.db.userOnBoard.findFirst({
           where: {
-            userId_boardId: {
-              boardId: taskObj.List.boardId,
-              userId: user.id,
-            },
+            boardId: taskObj.List.boardId,
+            userId: user.id,
           },
         });
         if (!fetch) return null;

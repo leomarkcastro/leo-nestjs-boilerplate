@@ -36,6 +36,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message: exception,
     };
 
+    Logger.debug(exception);
+
     if (exception instanceof BadRequestException) {
       responseBody.message = exception.getResponse();
     } else if (exception instanceof HttpException) {

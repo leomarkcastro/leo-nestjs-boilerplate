@@ -6,8 +6,8 @@ import { Roles } from '../../global/types/Roles.dto';
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = 'admin@email.com';
-  const password = 'admin';
+  const email = 'leo+bdbadmin@rvo.group';
+  const password = '@Admin123';
   const hashedPassword = hashSync(password, 10);
 
   const user = await prisma.user.create({

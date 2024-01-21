@@ -91,12 +91,10 @@ export class AppTaskService {
     data: ManageMembersRequest[],
   ): Promise<BoardWithUsers> {
     for (const member of data) {
-      await this.db.userOnBoard.update({
+      await this.db.userOnBoard.updateMany({
         where: {
-          userId_boardId: {
-            boardId: id,
-            userId: member.userId,
-          },
+          boardId: id,
+          userId: member.userId,
         },
         data: {
           type: member.type,
