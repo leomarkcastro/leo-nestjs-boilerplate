@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class IPagination {
@@ -7,9 +8,11 @@ export class IPagination {
   search?: string;
 
   @IsNumber()
+  @Type(() => Number)
   page?: number = 1;
 
   @IsNumber()
+  @Type(() => Number)
   limit?: number = 10;
 
   @IsString()
@@ -25,14 +28,17 @@ export class IPaginationResponse<T> {
   data: T[];
 
   @IsNumber()
+  @Type(() => Number)
   @ApiProperty({ type: Number })
   total: number;
 
   @IsNumber()
+  @Type(() => Number)
   @ApiProperty({ type: Number })
   page: number;
 
   @IsNumber()
+  @Type(() => Number)
   @ApiProperty({ type: Number })
   limit: number;
 

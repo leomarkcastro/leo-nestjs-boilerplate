@@ -1,4 +1,5 @@
 import { PartialType } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsDateString,
@@ -17,18 +18,19 @@ export class CreateCalendarDto {
 
   @IsOptional()
   @IsBoolean()
+  @Type(() => Boolean)
   hasStatus?: boolean;
 
   // check if string follows the rgba format
   @IsString()
-  @Matches(/^#([0-9A-F]{3}){1,2}$/i, {
+  @Matches(/^#?([a-f\d]{3,4}|[a-f\d]{6}|[a-f\d]{8})$/i, {
     message: 'invalid rgba format',
   })
   backgroundColor: string;
 
   // check if string follows the rgba format
   @IsString()
-  @Matches(/^#([0-9A-F]{3}){1,2}$/i, {
+  @Matches(/^#?([a-f\d]{3,4}|[a-f\d]{6}|[a-f\d]{8})$/i, {
     message: 'invalid rgba format',
   })
   textColor: string;
@@ -53,9 +55,11 @@ export class QueryCalendarDto {
 
   @IsOptional()
   @IsBoolean()
+  @Type(() => Boolean)
   captureAll?: boolean = false;
 
   @IsOptional()
   @IsBoolean()
+  @Type(() => Boolean)
   hasStatusFilter?: boolean = false;
 }

@@ -1,4 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsDateString,
@@ -26,6 +27,7 @@ export class CreateEventDto {
 
   @IsOptional()
   @IsBoolean()
+  @Type(() => Boolean)
   allDay?: boolean = false;
 
   @IsString()
@@ -37,12 +39,13 @@ export class CreateEventDto {
 
   @IsOptional()
   @IsNumber()
+  @Type(() => Number)
   statusBoardIndex?: number;
 
   // check if string follows the rgba format (#RRGGBBAA)
   @IsOptional()
   @IsString()
-  @Matches(/^#([0-9A-F]{3}){1,2}$/i, {
+  @Matches(/^#?([a-f\d]{3,4}|[a-f\d]{6}|[a-f\d]{8})$/i, {
     message: 'invalid hex format',
   })
   backgroundColor?: string;
@@ -50,7 +53,7 @@ export class CreateEventDto {
   // check if string follows the rgba format
   @IsOptional()
   @IsString()
-  @Matches(/^#([0-9A-F]{3}){1,2}$/i, {
+  @Matches(/^#?([a-f\d]{3,4}|[a-f\d]{6}|[a-f\d]{8})$/i, {
     message: 'invalid rgba format',
   })
   textColor?: string;

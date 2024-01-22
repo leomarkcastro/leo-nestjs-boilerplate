@@ -1,4 +1,5 @@
 import { File as DbFile } from '@prisma/client';
+import { Type } from 'class-transformer';
 import { IsArray, IsNumber, IsString, IsUrl } from 'class-validator';
 
 export class CreateFileObject {
@@ -13,6 +14,7 @@ export class CreateFileObject {
   type: string;
 
   @IsNumber()
+  @Type(() => Number)
   size: number;
 }
 
