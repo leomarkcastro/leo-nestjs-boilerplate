@@ -1,3 +1,4 @@
+import { Group } from '@/global/prisma-classes/group';
 import {
   basicSearch,
   paginationObject,
@@ -7,7 +8,7 @@ import {
   IPaginationResponse,
 } from '@/global/types/Pagination.dto';
 import { Injectable } from '@nestjs/common';
-import { Group, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../db-prisma/db-prisma.service';
 import {
   CreateAppGroupDto,

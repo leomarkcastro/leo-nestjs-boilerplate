@@ -1,4 +1,5 @@
 import { CONFIG } from '@/config/env';
+import { UserFlags } from '@/global/prisma-classes/user_flags';
 import { AuthResponse } from '@/global/types/AuthResponse.dto';
 import { Roles } from '@/global/types/Roles.dto';
 import { MailBrevoService } from '@/modules/mail-brevo/mail-brevo.service';
@@ -7,7 +8,6 @@ import { UsedKeysService } from '@/modules/used-keys/used-keys.service';
 import { PrismaService } from '@@/db-prisma/db-prisma.service';
 import { HttpException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserFlags } from '@prisma/client';
 import { compareSync, hashSync } from 'bcrypt';
 import { IChangePassword } from '../types/ChangePassword.dto';
 import { PartialUserFlag, UserFlag } from '../types/UserFlag.dto';
