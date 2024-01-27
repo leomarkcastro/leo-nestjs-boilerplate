@@ -1,6 +1,7 @@
 import { Auth } from '@/global/decorators/Auth.decorator';
 import { CurrentUser } from '@/global/decorators/CurrentUser.decorator';
 import { WithPermission } from '@/global/decorators/Permissions.decorator';
+import { UserFlags } from '@/global/prisma-classes/user_flags';
 import { AuthResponse } from '@/global/types/AuthResponse.dto';
 import {
   Body,
@@ -12,7 +13,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UserFlags } from '@prisma/client';
 import { TwoFAEMailAuthGuard } from '../auth/guard/2fa_email.guard';
 import { LocalAuthGuard } from '../auth/guard/local.guard';
 import { AuthService } from '../auth/services/auth.service';
