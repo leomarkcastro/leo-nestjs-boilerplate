@@ -5,7 +5,6 @@ import { Group as CGroup } from '@/global/prisma-classes/group';
 import { IPagination } from '@/global/types/Pagination.dto';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { Group } from '@prisma/client';
 import { PERMISSIONS } from '../permit/permissions.types';
 import { AppGroupService } from './app-group.service';
 import {
@@ -25,7 +24,7 @@ export class AppGroupController {
   @Auth()
   group_create(
     @Body() createAppDepartmentDto: CreateAppGroupDto,
-  ): Promise<Group> {
+  ): Promise<CGroup> {
     return this.appDepartmentService.create(createAppDepartmentDto);
   }
 
@@ -35,7 +34,7 @@ export class AppGroupController {
   group_update(
     @Param('id') id: string,
     @Body() updateAppDepartmentDto: UpdateAppGroupDto,
-  ): Promise<Group> {
+  ): Promise<CGroup> {
     return this.appDepartmentService.update(id, updateAppDepartmentDto);
   }
 
@@ -62,7 +61,7 @@ export class AppGroupController {
   @Post('delete/:id')
   @WithPermission([PERMISSIONS.DEPARTMENTS.DELETE])
   @Auth()
-  group_remove(@Param('id') id: string): Promise<Group> {
+  group_remove(@Param('id') id: string): Promise<CGroup> {
     return this.appDepartmentService.remove(id);
   }
 
