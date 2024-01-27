@@ -1,8 +1,9 @@
 import { Calendar } from '@/global/prisma-classes/calendar';
 import { Event } from '@/global/prisma-classes/event';
+import { SitutationBoard } from '@/global/prisma-classes/situtation_board';
 import { StatusBoard } from '@/global/prisma-classes/status_board';
 import { HttpException, Injectable } from '@nestjs/common';
-import { Prisma, SitutationBoard } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { IUserJwt } from '../auth/types/UserJWT.dto';
 import { PrismaService } from '../db-prisma/db-prisma.service';
 import {
