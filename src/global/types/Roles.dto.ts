@@ -3,4 +3,5 @@ export const Roles = {
   USER: 'USER',
   ADMIN: 'ADMIN',
   DEV: 'DEV',
+  CONTACTS: 'CONTACTS',
 };

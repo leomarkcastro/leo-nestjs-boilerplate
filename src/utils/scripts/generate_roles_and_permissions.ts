@@ -18,12 +18,12 @@ function recursivelyGetValues(obj: any) {
   return values;
 }
 
-async function main() {
+export async function generate_roles_and_permissions() {
   const ROLES_TO_CREATE = Object.values(Roles);
   const PERMISSIONS_TO_CREATE = recursivelyGetValues(PERMISSIONS);
 
   const PERMISSIONS_TO_ROLE = {
-    USER: [
+    [Roles.USER]: [
       PERMISSIONS.AUTH.CHANGE_PASSWORD,
       PERMISSIONS.AUTH.ME,
       PERMISSIONS.AUTH.UPDATEME,
@@ -41,14 +41,15 @@ async function main() {
       ...recursivelyGetValues(PERMISSIONS.TASK),
       PERMISSIONS.NOTIF.READ,
     ],
-    GUEST: [
+    [Roles.GUEST]: [
       PERMISSIONS.AUTH.LOGIN,
       PERMISSIONS.AUTH.REGISTER,
       PERMISSIONS.AUTH.RESET_PASSWORD,
     ],
+    [Roles.CONTACTS]: [],
   };
 
-  PERMISSIONS_TO_ROLE['ADMIN'] = [
+  PERMISSIONS_TO_ROLE[Roles.ADMIN] = [
     ...PERMISSIONS_TO_ROLE.USER,
     ...recursivelyGetValues(PERMISSIONS.CONTACTS),
     ...recursivelyGetValues(PERMISSIONS.DEPARTMENTS),
@@ -63,8 +64,8 @@ async function main() {
     PERMISSIONS.FLAGS.ADMINUI,
   ];
 
-  PERMISSIONS_TO_ROLE['DEV'] = [
-    ...PERMISSIONS_TO_ROLE['ADMIN'],
+  PERMISSIONS_TO_ROLE[Roles.DEV] = [
+    ...PERMISSIONS_TO_ROLE[Roles.ADMIN],
     PERMISSIONS.TEST.USE,
   ];
 
@@ -166,5 +167,3 @@ async function main() {
     }
   }
 }
-
-main();

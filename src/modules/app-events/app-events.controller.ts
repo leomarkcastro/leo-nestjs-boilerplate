@@ -28,6 +28,11 @@ import {
   UpdateEventsDto,
 } from './dto/CreateEvent.dto';
 import {
+  CreateSituationBoardDto,
+  UpdateSituationBoardDto,
+  UpdateSituationBoardSort,
+} from './dto/CreateSituationBoard.dto';
+import {
   CreateStatusBoardDto,
   UpdateStatusBoardDto,
   UpdateStatusBoardSort,
@@ -387,5 +392,50 @@ export class AppEventsController {
   @Auth()
   async statusboard_sort(@Body() data: UpdateStatusBoardSort) {
     return await this.service.sortStatusBoards(data.ids);
+  }
+
+  // ===================================== situation board
+
+  // get list
+  @Get('situationboard')
+  @WithPermission([PERMISSIONS.EVENTS.STATUSBOARD.GET])
+  @Auth()
+  async situationboard_getList() {
+    return await this.service.getSituationBoards();
+  }
+
+  // create
+  @Post('situationboard/create')
+  @WithPermission([PERMISSIONS.EVENTS.STATUSBOARD.CREATE])
+  @Auth()
+  async situationboard_create(@Body() data: CreateSituationBoardDto) {
+    return await this.service.createSituationBoard(data);
+  }
+
+  // update details
+  @Post('situationboard/update/:id')
+  @WithPermission([PERMISSIONS.EVENTS.STATUSBOARD.UPDATE])
+  @Auth()
+  async situationboard_update(
+    @Param('id') id: string,
+    @Body() data: UpdateSituationBoardDto,
+  ) {
+    return await this.service.updateSituationBoard(id, data);
+  }
+
+  // delete
+  @Post('situationboard/delete/:id')
+  @WithPermission([PERMISSIONS.EVENTS.STATUSBOARD.DELETE])
+  @Auth()
+  async situationboard_delete(@Param('id') id: string) {
+    return await this.service.deleteSituationBoard(id);
+  }
+
+  // sort
+  @Post('situationboard/sort')
+  @WithPermission([PERMISSIONS.EVENTS.STATUSBOARD.UPDATE])
+  @Auth()
+  async situationboard_sort(@Body() data: UpdateSituationBoardSort) {
+    return await this.service.sortSituationBoards(data.ids);
   }
 }

@@ -30,6 +30,8 @@ model User {
   phone              String?
   avatar             String?
   address            String?
+  company            String?
+  jobTitle           String?
   LocalAuth          LocalAuth?
   NotificationOnUser NotificationOnUser[]
   FileOnUser         FileOnUser[]
@@ -39,6 +41,8 @@ model User {
   Position           Position?            @relation(fields: [positionId], references: [id], onDelete: SetNull)
   positionId         String?
   UserOnBoard        UserOnBoard[]
+  UserFlags          UserFlags[]
+  GroupOnUser        GroupOnUser[]
 }
 
 model LocalAuth {
@@ -207,22 +211,25 @@ model CalendarOnUser {
 }
 
 model Event {
-  id               String        @id @default(cuid())
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  title            String
-  description      String?
-  backgroundColor  String?
-  textColor        String?
-  start            DateTime?
-  end              DateTime?
-  allDay           Boolean
-  Calendar         Calendar      @relation(fields: [calendarId], references: [id], onDelete: Cascade)
-  calendarId       String
-  TaskOnEvent      TaskOnEvent[]
-  StatusBoard      StatusBoard?  @relation(fields: [statusBoardId], references: [id], onDelete: SetNull)
-  statusBoardId    String?
-  statusBoardIndex Int?
+  id                String           @id @default(cuid())
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  title             String
+  description       String?
+  backgroundColor   String?
+  textColor         String?
+  start             DateTime?
+  end               DateTime?
+  allDay            Boolean
+  Calendar          Calendar         @relation(fields: [calendarId], references: [id], onDelete: Cascade)
+  calendarId        String
+  TaskOnEvent       TaskOnEvent[]
+  StatusBoard       StatusBoard?     @relation(fields: [statusBoardId], references: [id], onDelete: SetNull)
+  statusBoardId     String?
+  statusBoardIndex  Int?
+  SitutationBoard   SitutationBoard? @relation(fields: [situtationBoardId], references: [id], onDelete: SetNull)
+  situtationBoardId String?
+  EventReminder     EventReminder[]
 }
 
 model TaskOnEvent {
@@ -284,4 +291,55 @@ model StatusBoard {
   bgColor   String?
   index     Int
   Event     Event[]
+}
+
+model SitutationBoard {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  color     String?
+  bgColor   String?
+  index     Int
+  Event     Event[]
+}
+
+model UserFlags {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  data      String?
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+}
+
+model EventReminder {
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  name           String?
+  remindDuration Int
+  remindAt       DateTime
+  done           Boolean  @default(false)
+  Event          Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId        String
+}
+
+model Group {
+  id          String        @id @default(cuid())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  name        String
+  GroupOnUser GroupOnUser[]
+}
+
+model GroupOnUser {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId   String
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
 }

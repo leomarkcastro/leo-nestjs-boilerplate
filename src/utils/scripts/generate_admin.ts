@@ -5,7 +5,7 @@ import { Roles } from '../../global/types/Roles.dto';
 // instantiate prisma client
 const prisma = new PrismaClient();
 
-async function main() {
+export async function generate_admin() {
   const email = 'leo+bdbadmin@rvo.group';
   const password = '@Admin123';
   const hashedPassword = hashSync(password, 10);
@@ -28,12 +28,3 @@ async function main() {
 
   console.log(user);
 }
-
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });

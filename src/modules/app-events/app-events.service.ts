@@ -2,7 +2,7 @@ import { Calendar } from '@/global/prisma-classes/calendar';
 import { Event } from '@/global/prisma-classes/event';
 import { StatusBoard } from '@/global/prisma-classes/status_board';
 import { HttpException, Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, SitutationBoard } from '@prisma/client';
 import { IUserJwt } from '../auth/types/UserJWT.dto';
 import { PrismaService } from '../db-prisma/db-prisma.service';
 import {
@@ -22,6 +22,14 @@ import {
   UpdateEventDto,
   UpdateEventsDto,
 } from './dto/CreateEvent.dto';
+import {
+  CreateEventReminderDto,
+  UpdateEventReminderDto,
+} from './dto/CreateEventReminder.dto';
+import {
+  CreateSituationBoardDto,
+  UpdateSituationBoardDto,
+} from './dto/CreateSituationBoard.dto';
 import {
   CreateStatusBoardDto,
   UpdateStatusBoardDto,
@@ -464,7 +472,7 @@ export class AppEventsService {
       statusBoardIndex = statusBoardCount;
     }
 
-    return await this.db.event.update({
+    const updatedEvent = await this.db.event.update({
       where: {
         id,
       },
@@ -473,6 +481,12 @@ export class AppEventsService {
         statusBoardIndex,
       },
     });
+
+    if (data.start) {
+      await this.updateReminderTimeOnStartDateChange(id);
+    }
+
+    return updatedEvent;
   }
 
   // delete
@@ -487,12 +501,7 @@ export class AppEventsService {
   // update batch
   async updateDetailsBatch(events: UpdateEventsDto): Promise<Event[]> {
     const promises = events.events.map((event) => {
-      return this.db.event.update({
-        where: {
-          id: event.id,
-        },
-        data: event.data,
-      });
+      return this.updateDetails(event.id, event.data);
     });
 
     return await Promise.all(promises);
@@ -542,6 +551,162 @@ export class AppEventsService {
         },
         data: {
           index,
+        },
+      });
+    });
+
+    return await Promise.all(promises);
+  }
+
+  // ===================================== situation board
+  // get
+  async getSituationBoards(): Promise<SitutationBoard[]> {
+    return await this.db.situtationBoard.findMany();
+  }
+
+  // create
+  async createSituationBoard(
+    data: CreateSituationBoardDto,
+  ): Promise<SitutationBoard> {
+    return await this.db.situtationBoard.create({
+      data,
+    });
+  }
+
+  // update
+  async updateSituationBoard(
+    id: string,
+    data: Partial<UpdateSituationBoardDto>,
+  ): Promise<SitutationBoard> {
+    return await this.db.situtationBoard.update({
+      where: {
+        id,
+      },
+      data,
+    });
+  }
+
+  // delete
+  async deleteSituationBoard(id: string): Promise<SitutationBoard> {
+    return await this.db.situtationBoard.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  // sort situation board
+  async sortSituationBoards(
+    situationBoardIds: string[],
+  ): Promise<SitutationBoard[]> {
+    const promises = situationBoardIds.map((statusBoardId, index) => {
+      return this.db.situtationBoard.update({
+        where: {
+          id: statusBoardId,
+        },
+        data: {
+          index,
+        },
+      });
+    });
+
+    return await Promise.all(promises);
+  }
+
+  // ===================================== notifications
+
+  // create
+  async createNotification(createNotif: CreateEventReminderDto) {
+    // get the event provided
+    const event = await this.db.event.findUnique({
+      where: {
+        id: createNotif.eventID,
+      },
+    });
+
+    if (!event) {
+      throw new HttpException('Event not found', 404);
+    }
+
+    const remindOn = new Date(event.start);
+    remindOn.setMinutes(remindOn.getMinutes() - createNotif.remindOn);
+
+    return await this.db.eventReminder.create({
+      data: {
+        eventId: createNotif.eventID,
+        remindDuration: createNotif.remindOn,
+        remindAt: remindOn.toISOString(),
+      },
+    });
+  }
+
+  // update
+  async updateNotification(id: string, updateNotif: UpdateEventReminderDto) {
+    // get the event provided
+    const event = await this.db.eventReminder.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        Event: true,
+      },
+    });
+
+    if (!event) {
+      throw new HttpException('Event not found', 404);
+    }
+
+    const remindOn = new Date(event.Event.start);
+    remindOn.setMinutes(remindOn.getMinutes() - updateNotif.remindOn);
+
+    return await this.db.eventReminder.update({
+      where: {
+        id: id,
+      },
+      data: {
+        remindDuration: updateNotif.remindOn,
+        remindAt: remindOn.toISOString(),
+      },
+    });
+  }
+
+  // delete
+  async deleteNotification(id: string) {
+    return await this.db.eventReminder.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  // update reminder time on start date change
+  async updateReminderTimeOnStartDateChange(eventId: string) {
+    const event = await this.db.event.findUnique({
+      where: {
+        id: eventId,
+      },
+    });
+
+    if (!event) {
+      throw new HttpException('Event not found', 404);
+    }
+
+    const reminders = await this.db.eventReminder.findMany({
+      where: {
+        eventId: eventId,
+      },
+    });
+
+    const promises = reminders.map((reminder) => {
+      const remindOn = new Date(event.start);
+      remindOn.setMinutes(remindOn.getMinutes() - reminder.remindDuration);
+
+      return this.db.eventReminder.update({
+        where: {
+          id: reminder.id,
+        },
+        data: {
+          remindAt: remindOn.toISOString(),
         },
       });
     });

@@ -20,6 +20,12 @@ export class UpdatableUser {
 
   @IsString()
   address: string;
+
+  @IsString()
+  company: string;
+
+  @IsString()
+  jobTitle: string;
 }
 
 export class PartialUpdatableUser extends PartialType(UpdatableUser) {}
@@ -42,4 +48,6 @@ export class IUserMe extends UpdatableUser {
   address: string;
   description: string;
   phone: string;
+  company: string;
+  jobTitle: string;
 }

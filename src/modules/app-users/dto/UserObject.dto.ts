@@ -16,6 +16,8 @@ export class UserCreate {
   roleId?: string;
   departmentId?: string;
   positionId?: string;
+  company?: string;
+  jobTitle?: string;
 }
 
 export class UserUpdate extends PartialType(UserCreate) {}

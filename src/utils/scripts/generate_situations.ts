@@ -3,19 +3,15 @@ import { PrismaClient } from '@prisma/client';
 // instantiate prisma client
 const prisma = new PrismaClient();
 
-export async function generate_boards() {
+export async function generate_situations() {
   const boards = [
     {
-      name: 'Case Filing',
+      name: 'Acknowledged',
       color: '#FFC107',
     },
     {
-      name: 'Documentation',
+      name: 'In Progress',
       color: '#17A2B8',
-    },
-    {
-      name: 'Hearing',
-      color: '#007BFF',
     },
     {
       name: 'Done',
@@ -30,19 +26,19 @@ export async function generate_boards() {
   // add index to boards
   for (let i = 0; i < boards.length; i++) {
     // if board already exists, skip
-    const board = await prisma.statusBoard.findFirst({
+    const board = await prisma.situtationBoard.findFirst({
       where: {
         name: boards[i].name,
       },
     });
 
     if (board) {
-      console.log(`Board ${boards[i].name} already exists`);
+      console.log(`Situation ${boards[i].name} already exists`);
       continue;
     }
 
     console.log(`Creating board ${boards[i].name}`);
-    await prisma.statusBoard.create({
+    await prisma.situtationBoard.create({
       data: {
         name: boards[i].name,
         color: boards[i].color,

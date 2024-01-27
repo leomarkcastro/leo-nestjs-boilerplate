@@ -6,15 +6,18 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Request,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { UserFlags } from '@prisma/client';
 import { TwoFAEMailAuthGuard } from '../auth/guard/2fa_email.guard';
 import { LocalAuthGuard } from '../auth/guard/local.guard';
 import { AuthService } from '../auth/services/auth.service';
 import { IChangePassword } from '../auth/types/ChangePassword.dto';
+import { PartialUserFlag, UserFlag } from '../auth/types/UserFlag.dto';
 import { IUserJwt } from '../auth/types/UserJWT.dto';
 import { IUserMe, PartialUpdatableUser } from '../auth/types/UserMe.dto';
 import { PERMISSIONS } from '../permit/permissions.types';
@@ -127,6 +130,38 @@ export class AppAuthController {
     @Body() update: PartialUpdatableUser,
   ): Promise<IUserMe> {
     return await this.authService.updateMe(user, update);
+  }
+
+  @Get('flag/:flag')
+  @WithPermission([PERMISSIONS.AUTH.UPDATEME])
+  @Auth()
+  async auth_getFlag(
+    @CurrentUser() user: IUserJwt,
+    @Param('flag') flag: string,
+  ): Promise<UserFlags> {
+    return await this.authService.getUserFlag(user, flag);
+  }
+
+  @Post('flag/set/:flag')
+  @WithPermission([PERMISSIONS.AUTH.UPDATEME])
+  @Auth()
+  async auth_setFlag(
+    @CurrentUser() user: IUserJwt,
+    @Param('flag') flag: string,
+    @Body() data: UserFlag,
+  ): Promise<UserFlags> {
+    return await this.authService.createUserFlag(user, flag, data);
+  }
+
+  @Post('flag/update/:flag')
+  @WithPermission([PERMISSIONS.AUTH.UPDATEME])
+  @Auth()
+  async auth_updateFlag(
+    @CurrentUser() user: IUserJwt,
+    @Param('flag') flag: string,
+    @Body() update: PartialUserFlag,
+  ): Promise<UserFlags> {
+    return await this.authService.updateUserFlag(user, flag, update);
   }
 
   @Post('change-password')

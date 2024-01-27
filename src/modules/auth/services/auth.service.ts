@@ -7,8 +7,10 @@ import { UsedKeysService } from '@/modules/used-keys/used-keys.service';
 import { PrismaService } from '@@/db-prisma/db-prisma.service';
 import { HttpException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { UserFlags } from '@prisma/client';
 import { compareSync, hashSync } from 'bcrypt';
 import { IChangePassword } from '../types/ChangePassword.dto';
+import { PartialUserFlag, UserFlag } from '../types/UserFlag.dto';
 import { IUserJwt } from '../types/UserJWT.dto';
 import { IUserMe, UpdatableUser } from '../types/UserMe.dto';
 
@@ -195,6 +197,8 @@ export class AuthService {
       position: userObj.Position?.name,
       positionId: userObj.Position?.id,
       name: userObj.firstName,
+      company: userObj.company,
+      jobTitle: userObj.jobTitle,
     };
   }
 
@@ -208,6 +212,55 @@ export class AuthService {
     });
 
     return await this.getMe(user);
+  }
+
+  async getUserFlag(user: IUserJwt, flag: string): Promise<UserFlags | null> {
+    const userFlag = await this.database.userFlags.findUnique({
+      where: {
+        id: flag,
+        userId: user.id,
+      },
+    });
+
+    return userFlag;
+  }
+
+  async createUserFlag(
+    user: IUserJwt,
+    flag: string,
+    data: UserFlag,
+  ): Promise<UserFlags> {
+    return await this.database.userFlags.create({
+      data: {
+        id: flag,
+        userId: user.id,
+        ...data,
+      },
+    });
+  }
+
+  async updateUserFlag(
+    user: IUserJwt,
+    flag: string,
+    data: PartialUserFlag,
+  ): Promise<UserFlags | null> {
+    const findFirstFlag = await this.database.userFlags.findFirst({
+      where: {
+        id: flag,
+        userId: user.id,
+      },
+    });
+
+    if (!findFirstFlag) return null;
+
+    const updated = await this.database.userFlags.update({
+      where: {
+        id: findFirstFlag?.id,
+      },
+      data,
+    });
+
+    return updated;
   }
 
   async changePassword(user: IUserJwt, passwordInput: IChangePassword) {
