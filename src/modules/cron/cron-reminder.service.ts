@@ -68,7 +68,7 @@ export class CronReminderService {
 
     const batchEmailData: SibApiV3Sdk.SendSmtpEmailMessageVersions[] = [];
 
-    const totalSent = 0;
+    let totalSent = 0;
     let totalEvents = 0;
 
     // loop through each event reminder
@@ -92,6 +92,8 @@ export class CronReminderService {
           };
         });
       }
+
+      totalSent += to.length;
 
       const eventInfo = reminder.Event;
 
