@@ -110,7 +110,7 @@ export class CronReminderService {
           .tz('Asia/Singapore')
           .format('MMMM D, YYYY h:mm A')} - ${moment(eventInfo.end)
           .tz('Asia/Singapore')
-          .format('h:mm A')}`;
+          .format('MMMM D, YYYY h:mm A')}`;
       }
 
       const params = {
