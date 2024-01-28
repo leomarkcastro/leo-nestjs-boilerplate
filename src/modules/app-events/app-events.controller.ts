@@ -28,6 +28,10 @@ import {
   UpdateEventsDto,
 } from './dto/CreateEvent.dto';
 import {
+  CreateEventReminderDto,
+  UpdateEventReminderDto,
+} from './dto/CreateEventReminder.dto';
+import {
   CreateSituationBoardDto,
   UpdateSituationBoardDto,
   UpdateSituationBoardSort,
@@ -279,6 +283,48 @@ export class AppEventsController {
     );
   }
 
+  async checkListMemberByReminder(user: IUserJwt, reminderId) {
+    return await this.permit.checkPermit(
+      user,
+      await (async () => {
+        const eventObj = await this.db.event.findFirst({
+          where: {
+            EventReminder: {
+              some: {
+                id: reminderId,
+              },
+            },
+          },
+          include: {
+            Calendar: true,
+          },
+        });
+        if (!eventObj) return null;
+        const fetch = await this.db.calendarOnUser.findFirst({
+          where: {
+            OR: [
+              {
+                calendarId: eventObj.Calendar.id,
+                userId: user.id,
+              },
+              {
+                calendarId: eventObj.Calendar.id,
+                IsPublic: true,
+              },
+            ],
+          },
+        });
+        if (!fetch) return null;
+        if (fetch.type === CalendarAccess.ADMIN) return fetch;
+        if (fetch.type === CalendarAccess.EDIT) return fetch;
+
+        return null;
+      })(),
+      IF_RESOURCE_EXIST,
+      THROW_ON_RESOURCE_NOT_FOUND,
+    );
+  }
+
   // get
   @Get()
   @WithPermission([PERMISSIONS.EVENTS.EVENT.GET])
@@ -437,5 +483,44 @@ export class AppEventsController {
   @Auth()
   async situationboard_sort(@Body() data: UpdateSituationBoardSort) {
     return await this.service.sortSituationBoards(data.ids);
+  }
+
+  // ===================================== notifications
+
+  // create
+  @Post('notification/create')
+  @WithPermission([PERMISSIONS.EVENTS.EVENT.UPDATE])
+  @Auth()
+  async eventnotification_create(
+    @CurrentUser() user: IUserJwt,
+    @Body() data: CreateEventReminderDto,
+  ) {
+    await this.checkListMemberByEvent(user, data.eventID);
+    return await this.service.createNotification(data);
+  }
+
+  // update
+  @Post('notification/update/:id')
+  @WithPermission([PERMISSIONS.EVENTS.EVENT.UPDATE])
+  @Auth()
+  async eventnotification_update(
+    @CurrentUser() user: IUserJwt,
+    @Param('id') id: string,
+    @Body() data: UpdateEventReminderDto,
+  ) {
+    await this.checkListMemberByReminder(user, id);
+    return await this.service.updateNotification(id, data);
+  }
+
+  // delete
+  @Post('notification/delete/:id')
+  @WithPermission([PERMISSIONS.EVENTS.EVENT.UPDATE])
+  @Auth()
+  async eventnotification_delete(
+    @CurrentUser() user: IUserJwt,
+    @Param('id') id: string,
+  ) {
+    await this.checkListMemberByReminder(user, id);
+    return await this.service.deleteNotification(id);
   }
 }

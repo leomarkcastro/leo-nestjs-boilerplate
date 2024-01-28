@@ -1,7 +1,8 @@
 import { CONFIG } from '@/config/env';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { Event } from '@prisma/client';
+import { Cron } from '@nestjs/schedule';
+import { User } from '@prisma/client';
+import * as SibApiV3Sdk from 'sib-api-v3-typescript';
 import { PrismaService } from '../db-prisma/db-prisma.service';
 import { MailBrevoService } from '../mail-brevo/mail-brevo.service';
 
@@ -10,11 +11,24 @@ export class CronReminderService {
   constructor(
     private readonly database: PrismaService,
     private readonly mail: MailBrevoService,
-  ) {}
+  ) {
+    console.log('CronReminderService', CronReminderService.name);
+  }
 
   private readonly logger = new Logger(CronReminderService.name);
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  nameProcessor(user: User) {
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    } else if (user.firstName) {
+      return user.firstName;
+    } else if (user.name) {
+      return user.name;
+    }
+    return user.email;
+  }
+
+  @Cron(CONFIG.EVENT_REMINDER_CRON_FREQUENCY)
   async sendReminderEmails() {
     this.logger.debug('Running Cron Reminder Emails');
 
@@ -43,13 +57,51 @@ export class CronReminderService {
       },
     });
 
+    const batchEmailData: SibApiV3Sdk.SendSmtpEmailMessageVersions = {
+      to: [],
+      params: null,
+    };
+
+    let totalSent = 0;
+    let totalEvents = 0;
+
     // loop through each event reminder
     for (const reminder of eventReminder) {
       // send email to each user
       for (const user of reminder.Event.Calendar.CalendarOnUser) {
         if (!user.User.email) continue;
-        await this.sendEmailRoutine(user.User.email, reminder.Event);
+        batchEmailData.to.push({
+          email: user.User.email,
+          name: this.nameProcessor(user.User),
+        });
+        totalSent++;
+        if (!batchEmailData.params) {
+          const eventInfo = reminder.Event;
+          batchEmailData.params = {
+            // @ts-expect-error Should be ok
+            name: eventInfo.title,
+            // @ts-expect-error Should be ok
+            description: eventInfo.description,
+            start: eventInfo.start,
+            end: eventInfo.end,
+            // @ts-expect-error Should be ok
+            allDay: eventInfo.allDay,
+            members: reminder.Event.Calendar.CalendarOnUser.map((user) => ({
+              name: this.nameProcessor(user.User),
+              email: user.User.email,
+            })),
+          };
+        }
       }
+
+      totalEvents++;
+
+      await this.mail.sendBatchEmailByBrevoTemplate(
+        [batchEmailData],
+        'Event Reminder',
+        'BDB Portal Event Reminder',
+        CONFIG.BREVO_TEMPLATE_EVENT_REMINDER,
+      );
 
       // update reminder as done
       await this.database.eventReminder.update({
@@ -61,22 +113,7 @@ export class CronReminderService {
         },
       });
     }
-  }
 
-  async sendEmailRoutine(email: string, eventInfo: Event) {
-    // send email to user
-    await this.mail.sendEmailByBrevoTemplate(
-      email,
-      'Event Reminder',
-      CONFIG.BREVO_TEMPLATE_EVENT_REMINDER,
-      {
-        username: email,
-        name: eventInfo.title,
-        description: eventInfo.description,
-        start: eventInfo.start,
-        end: eventInfo.end,
-        allDay: eventInfo.allDay,
-      },
-    );
+    this.logger.debug(`Sent ${totalSent} emails for ${totalEvents} events`);
   }
 }

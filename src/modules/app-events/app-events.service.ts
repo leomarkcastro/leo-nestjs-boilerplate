@@ -332,6 +332,7 @@ export class AppEventsService {
         textColor: createEvent.textColor,
         statusBoardId: createEvent.statusBoardId,
         statusBoardIndex: createEvent.statusBoardIndex,
+        situtationBoardId: createEvent.situtationBoardId,
       },
     });
   }
@@ -435,6 +436,8 @@ export class AppEventsService {
           },
         },
         StatusBoard: true,
+        SitutationBoard: true,
+        EventReminder: true,
       },
     });
 
@@ -444,12 +447,16 @@ export class AppEventsService {
         ...event,
         backgroundColor:
           event.backgroundColor ??
+          // event.SitutationBoard?.bgColor ??
           event.StatusBoard?.bgColor ??
-          event.Calendar.backgroundColor,
+          event.Calendar?.backgroundColor ??
+          '#00000000',
         textColor:
           event.textColor ??
+          // event.SitutationBoard?.color ??
           event.StatusBoard?.color ??
-          event.Calendar.textColor,
+          event.Calendar?.textColor ??
+          '#ffffffff',
       };
     });
 
@@ -660,6 +667,9 @@ export class AppEventsService {
     const remindOn = new Date(event.Event.start);
     remindOn.setMinutes(remindOn.getMinutes() - updateNotif.remindOn);
 
+    // check if event start date is past current time, if so, dont set done to true
+    const isStartPastCurrentTime = new Date(event.Event.start) < new Date();
+
     return await this.db.eventReminder.update({
       where: {
         id: id,
@@ -667,6 +677,7 @@ export class AppEventsService {
       data: {
         remindDuration: updateNotif.remindOn,
         remindAt: remindOn.toISOString(),
+        done: isStartPastCurrentTime,
       },
     });
   }
@@ -702,12 +713,16 @@ export class AppEventsService {
       const remindOn = new Date(event.start);
       remindOn.setMinutes(remindOn.getMinutes() - reminder.remindDuration);
 
+      // check if event start date is past current time, if so, dont set done to true
+      const isStartPastCurrentTime = new Date(event.start) < new Date();
+
       return this.db.eventReminder.update({
         where: {
           id: reminder.id,
         },
         data: {
           remindAt: remindOn.toISOString(),
+          done: isStartPastCurrentTime,
         },
       });
     });

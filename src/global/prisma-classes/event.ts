@@ -39,4 +39,7 @@ export class Event {
 
   @ApiPropertyOptional({ type: Number })
   statusBoardIndex?: number;
+
+  @ApiPropertyOptional({ type: String })
+  situtationBoardId?: string;
 }

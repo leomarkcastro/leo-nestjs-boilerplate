@@ -215,9 +215,9 @@ export class AuthService {
   }
 
   async getUserFlag(user: IUserJwt, flag: string): Promise<UserFlags | null> {
-    const userFlag = await this.database.userFlags.findUnique({
+    const userFlag = await this.database.userFlags.findFirst({
       where: {
-        id: flag,
+        name: flag,
         userId: user.id,
       },
     });
@@ -232,7 +232,7 @@ export class AuthService {
   ): Promise<UserFlags> {
     return await this.database.userFlags.create({
       data: {
-        id: flag,
+        name: flag,
         userId: user.id,
         ...data,
       },
@@ -246,7 +246,7 @@ export class AuthService {
   ): Promise<UserFlags | null> {
     const findFirstFlag = await this.database.userFlags.findFirst({
       where: {
-        id: flag,
+        name: flag,
         userId: user.id,
       },
     });

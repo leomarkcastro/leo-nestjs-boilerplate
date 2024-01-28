@@ -38,6 +38,10 @@ export class CreateEventDto {
   statusBoardId?: string;
 
   @IsOptional()
+  @IsString()
+  situtationBoardId?: string;
+
+  @IsOptional()
   @IsNumber()
   @Type(() => Number)
   statusBoardIndex?: number;
