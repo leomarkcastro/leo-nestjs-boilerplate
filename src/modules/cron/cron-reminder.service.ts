@@ -60,8 +60,8 @@ export class CronReminderService {
 
     const allUsersQuery = await this.database.user.findMany({
       where: {
-        email: {
-          not: null,
+        NOT: {
+          email: null,
         },
       },
     });
