@@ -2,6 +2,7 @@ import { CONFIG } from '@/config/env';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { User } from '@prisma/client';
+import moment from 'moment-timezone';
 import * as SibApiV3Sdk from 'sib-api-v3-typescript';
 import { PrismaService } from '../db-prisma/db-prisma.service';
 import { MailBrevoService } from '../mail-brevo/mail-brevo.service';
@@ -57,51 +58,78 @@ export class CronReminderService {
       },
     });
 
-    const batchEmailData: SibApiV3Sdk.SendSmtpEmailMessageVersions = {
-      to: [],
-      params: null,
-    };
+    const allUsersQuery = await this.database.user.findMany({
+      where: {
+        email: {
+          not: null,
+        },
+      },
+    });
+    const allUsersObject = allUsersQuery.map((user) => {
+      return {
+        email: user.email,
+        name: this.nameProcessor(user),
+      };
+    });
 
-    let totalSent = 0;
+    const batchEmailData: SibApiV3Sdk.SendSmtpEmailMessageVersions[] = [];
+
+    const totalSent = 0;
     let totalEvents = 0;
 
     // loop through each event reminder
     for (const reminder of eventReminder) {
-      // send email to each user
-      for (const user of reminder.Event.Calendar.CalendarOnUser) {
-        if (!user.User.email) continue;
-        batchEmailData.to.push({
-          email: user.User.email,
-          name: this.nameProcessor(user.User),
-        });
-        totalSent++;
-        if (!batchEmailData.params) {
-          const eventInfo = reminder.Event;
-          batchEmailData.params = {
-            // @ts-expect-error Should be ok
-            name: eventInfo.title,
-            // @ts-expect-error Should be ok
-            description: eventInfo.description,
-            start: eventInfo.start,
-            end: eventInfo.end,
-            // @ts-expect-error Should be ok
-            allDay: eventInfo.allDay,
-            members: reminder.Event.Calendar.CalendarOnUser.map((user) => ({
-              name: this.nameProcessor(user.User),
-              email: user.User.email,
-            })),
+      // check if calendar is public
+      const isPublic =
+        reminder.Event.Calendar.CalendarOnUser.filter(
+          (user) => user.IsPublic === true,
+        ).length === 0;
+
+      let to = [];
+      if (isPublic) {
+        to = allUsersObject;
+      } else {
+        to = reminder.Event.Calendar.CalendarOnUser.filter(
+          (user) => user.User?.email,
+        ).map((user) => {
+          return {
+            email: user.User.email,
+            name: this.nameProcessor(user.User),
           };
-        }
+        });
       }
 
-      totalEvents++;
+      const eventInfo = reminder.Event;
 
-      await this.mail.sendBatchEmailByBrevoTemplate(
-        [batchEmailData],
-        'Event Reminder',
-        'BDB Portal Event Reminder',
-        CONFIG.BREVO_TEMPLATE_EVENT_REMINDER,
-      );
+      let dateObject = '';
+
+      if (eventInfo.allDay) {
+        // format: March 1, 2021 12:45 AM UTC
+        dateObject = moment(eventInfo.start)
+          .tz('Asia/Singapore')
+          .format('MMMM D, YYYY h:mm A');
+      } else {
+        // format: March 1, 2021 12:45 AM - 1:45 AM UTC
+        dateObject = `${moment(eventInfo.start)
+          .tz('Asia/Singapore')
+          .format('MMMM D, YYYY h:mm A')} - ${moment(eventInfo.end)
+          .tz('Asia/Singapore')
+          .format('h:mm A')}`;
+      }
+
+      const params = {
+        name: eventInfo.title,
+        description: eventInfo.description,
+        date: dateObject,
+        members: to,
+      };
+
+      totalEvents++;
+      batchEmailData.push({
+        to,
+        // @ts-expect-error ignore
+        params,
+      });
 
       // update reminder as done
       await this.database.eventReminder.update({
@@ -113,6 +141,13 @@ export class CronReminderService {
         },
       });
     }
+
+    await this.mail.sendBatchEmailByBrevoTemplate(
+      batchEmailData,
+      'Event Reminder',
+      'BDB Portal Event Reminder',
+      CONFIG.BREVO_TEMPLATE_EVENT_REMINDER,
+    );
 
     this.logger.debug(`Sent ${totalSent} emails for ${totalEvents} events`);
   }
