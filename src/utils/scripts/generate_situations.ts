@@ -47,3 +47,5 @@ export async function generate_situations() {
     });
   }
 }
+
+// generate_situations();

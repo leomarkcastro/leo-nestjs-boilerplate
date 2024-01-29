@@ -77,7 +77,7 @@ export class CronReminderService {
       const isPublic =
         reminder.Event.Calendar.CalendarOnUser.filter(
           (user) => user.IsPublic === true,
-        ).length === 0;
+        ).length >= 1;
 
       let to = [];
       if (isPublic) {

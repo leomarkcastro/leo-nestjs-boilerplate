@@ -167,3 +167,5 @@ export async function generate_roles_and_permissions() {
     }
   }
 }
+
+generate_roles_and_permissions();
