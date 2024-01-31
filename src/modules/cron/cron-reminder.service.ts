@@ -138,12 +138,14 @@ export class CronReminderService {
       });
     }
 
-    await this.mail.sendBatchEmailByBrevoTemplate(
-      batchEmailData,
-      'Event Reminder',
-      'BDB Portal Event Reminder',
-      CONFIG.BREVO_TEMPLATE_EVENT_REMINDER,
-    );
+    if (batchEmailData.length > 0) {
+      await this.mail.sendBatchEmailByBrevoTemplate(
+        batchEmailData,
+        'Event Reminder',
+        'BDB Portal Event Reminder',
+        CONFIG.BREVO_TEMPLATE_EVENT_REMINDER,
+      );
+    }
 
     this.logger.debug(`Sent ${totalSent} emails for ${totalEvents} events`);
   }

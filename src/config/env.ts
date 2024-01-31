@@ -3,6 +3,8 @@ dotenv.config();
 
 export const CONFIG = {
   DATABASE_URL: process.env.DATABASE_URL || 'file:./dev.db',
+  DATABASE_URL_DEV: process.env.DATABASE_URL_DEV || 'file:./dev.db',
+  DATABASE_URL_MIGRATE: process.env.DATABASE_URL_MIGRATE || 'file:./dev.db',
   SECRET: process.env.SECRET || 'secret',
   CORS_WHITELIST: process.env.CORS_WHITELIST || '*',
   CORS_ALLOWED_HEADERS:
